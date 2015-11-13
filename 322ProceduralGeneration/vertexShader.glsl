@@ -8,6 +8,8 @@ uniform mat4 modelViewMat;
 
 flat out vec4 colorsExport;
 
+flat out vec4 lightPos;
+
 void main(void)
 {
    gl_Position = projMat * modelViewMat * squareCoords;

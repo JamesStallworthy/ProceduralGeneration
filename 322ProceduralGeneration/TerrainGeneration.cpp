@@ -17,12 +17,14 @@ using namespace std;
 using namespace glm;
 
 // Size of the terrain
-const int MAP_SIZE = 17;
+const int MAP_SIZE = 33;
 
 const int SCREEN_WIDTH = 500;
 const int SCREEN_HEIGHT = 500;
 
-const int START_RAND_AMOUNT = 5;
+const int SEED = 12;
+
+const int START_RAND_AMOUNT = 10;
 const int RAND_AMOUNT = 5;
 
 struct Vertex
@@ -103,7 +105,6 @@ void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar
 float randomFloat(float min, float max) {
 	float random = ((float)rand()) / (float)RAND_MAX;
 	float range = max - min;
-	cout << (random*range) + min << endl;
 	return (random*range) + min;
 }
 void Diamond(int x1, int y1, int width,int iteration) {
@@ -148,7 +149,7 @@ void setup(void)
 	}
 
 	// TODO: Add your code here to calculate the height values of the terrain using the Diamond square algorithm
-	srand(4);
+	srand(SEED);
 	//Init
 	terrain[0][0] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
 	terrain[MAP_SIZE-1][0] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
@@ -180,7 +181,7 @@ void setup(void)
 		for (int x = 0; x < MAP_SIZE; x++)
 		{
 			// Set the coords (1st 4 elements) and a default colour of black (2nd 4 elements) 
-			terrainVertices[i] = { { (float)x, terrain[x][z], (float)z, 1.0 }, { 0.0, 0.0, 0.0, 1.0 } };
+			terrainVertices[i] = { { (float)x, terrain[x][z], (float)z, 1.0 }, { 0.0, 0.0, 1.0, 1.0 } };
 			i++;
 		}
 	}
@@ -223,6 +224,10 @@ void setup(void)
 	glUseProgram(programId);
 	///////////////////////////////////////
 
+	GLint loc = glGetUniformLocation(programId, "Colour");
+	float Colour[4] = {1,0,1,1};
+	glUniform4fv(loc, 1, Colour);
+
 	// Create vertex array object (VAO) and vertex buffer object (VBO) and associate data with vertex shader.
 	glGenVertexArrays(1, vao);
 	glGenBuffers(1, buffer);
@@ -247,8 +252,8 @@ void setup(void)
 	mat4 modelViewMat = mat4(1.0);
 	// Move terrain into view - glm::translate replaces glTranslatef
 	//modelViewMat = translate(modelViewMat, vec3(-2.5f, -2.5f, -10.0f)); // 5x5 grid
-	modelViewMat = translate(modelViewMat, vec3(-7.0f, -5.0f, -30.0f)); // 17x17 grid
-	modelViewMat = translate(modelViewMat, vec3(-7.0f, -5.0f, -30.0f)); // 17x17 grid
+	//modelViewMat = translate(modelViewMat, vec3(-7.0f, -5.0f, -30.0f)); // 17x17 grid
+	modelViewMat = translate(modelViewMat, vec3(-10.0f, -10.0f, -50.0f)); // 33x33 grid
 	modelViewMatLoc = glGetUniformLocation(programId, "modelViewMat");
 	glUniformMatrix4fv(modelViewMatLoc, 1, GL_FALSE, value_ptr(modelViewMat));
 
