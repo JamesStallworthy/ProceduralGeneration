@@ -12,6 +12,8 @@
 #include <GL/glext.h>
 #pragma comment(lib, "glew32.lib") 
 
+#include "DiamondSquare.h"
+
 using namespace std;
 
 using namespace glm;
@@ -22,7 +24,7 @@ const int MAP_SIZE = 33;
 const int SCREEN_WIDTH = 500;
 const int SCREEN_HEIGHT = 500;
 
-const int SEED = 12;
+const int SEED = 4;
 
 const int START_RAND_AMOUNT = 10;
 const int RAND_AMOUNT = 5;
@@ -31,6 +33,7 @@ struct Vertex
 {
 	float coords[4];
 	float colors[4];
+	float normal[4];
 };
 
 struct Matrix4x4
@@ -107,33 +110,57 @@ float randomFloat(float min, float max) {
 	float range = max - min;
 	return (random*range) + min;
 }
-void Diamond(int x1, int y1, int width,int iteration) {
-	//Diamond
-	terrain[x1+(width) / 2][y1+(width) / 2] = ((terrain[x1][y1] + terrain[x1+width][y1] + terrain[x1][y1+width] + terrain[x1+width][y1+width]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
-}
 
-void Square(int x1, int y1, int width,int iteration) {
+//DiamondSquare
+void Diamond(int x1, int y1, int width, int iteration) {
+	//Diamond
+	terrain[x1 + (width) / 2][y1 + (width) / 2] = ((terrain[x1][y1] + terrain[x1 + width][y1] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+}
+void Square(int x1, int y1, int width, int iteration) {
 	//Sqaure
 	//top
-	if (y1 - width/2 < 0)
-		terrain[x1 + width / 2][y1] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1 + width][y1]) / 3)+ randomFloat(-RAND_AMOUNT, RAND_AMOUNT)/iteration;
+	if (y1 - width / 2 < 0)
+		terrain[x1 + width / 2][y1] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1 + width][y1]) / 3) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	else
-		terrain[x1 + width / 2][y1] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1 + width][y1] + terrain[x1 + width / 2][y1 - width / 2]) / 4)+ randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width / 2][y1] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1 + width][y1] + terrain[x1 + width / 2][y1 - width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	//Left
 	if (x1 - width / 2 < 0)
-		terrain[x1][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1][y1 + width]) / 3)+ randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	else
-		terrain[x1][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1][y1 + width] + terrain[x1 - width / 2][y1 + width / 2]) / 4)+ randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1][y1 + width] + terrain[x1 - width / 2][y1 + width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	//Right
-	if (x1 + width + width/2 > MAP_SIZE-1)
-		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width]) / 3)+ randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+	if (x1 + width + width / 2 > MAP_SIZE - 1)
+		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	else
-		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width] + terrain[x1+width+width/2][y1+width/2]) / 4)+ randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width] + terrain[x1 + width + width / 2][y1 + width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	//Bottom
-	if (y1+width+width/2 > MAP_SIZE)
-		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width]) / 3)+ randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+	if (y1 + width + width / 2 > MAP_SIZE)
+		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	else
-		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width] + terrain[x1 + width/2][y1+width+width/2]) / 4)+ randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width] + terrain[x1 + width / 2][y1 + width + width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+}
+void DiamondSquare() {
+	terrain[0][0] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
+	terrain[MAP_SIZE - 1][0] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
+	terrain[0][MAP_SIZE - 1] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
+	terrain[MAP_SIZE - 1][MAP_SIZE - 1] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
+
+	int width = MAP_SIZE - 1;
+	int iteration = 1;
+	while (width > 1) {
+		for (int x = 0; x < MAP_SIZE - 1; x += width) {
+			for (int y = 0; y < MAP_SIZE - 1; y += width) {
+				Diamond(x, y, width, iteration);
+			}
+		}
+		for (int x = 0; x < MAP_SIZE - 1; x += width) {
+			for (int y = 0; y < MAP_SIZE - 1; y += width) {
+				Square(x, y, width, iteration);
+			}
+		}
+		width = width / 2.0f;
+		iteration++;
+	}
 }
 
 // Initialization routine.
@@ -147,31 +174,9 @@ void setup(void)
 			terrain[x][z] = 0;
 		}
 	}
-
-	// TODO: Add your code here to calculate the height values of the terrain using the Diamond square algorithm
 	srand(SEED);
-	//Init
-	terrain[0][0] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
-	terrain[MAP_SIZE-1][0] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
-	terrain[0][MAP_SIZE-1] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
-	terrain[MAP_SIZE-1][MAP_SIZE-1] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
-
-	int width = MAP_SIZE - 1;
-	int iteration = 1;
-	while (width > 1) {
-		for (int x = 0; x < MAP_SIZE -1; x += width) {
-			for (int y = 0; y < MAP_SIZE -1; y += width) {
-				Diamond(x, y, width, iteration);
-			}
-		}
-		for (int x = 0; x < MAP_SIZE - 1; x += width) {
-			for (int y = 0; y < MAP_SIZE - 1; y += width) {
-				Square(x, y, width, iteration);
-			}
-		}
-		width = width / 2.0f;
-		iteration++;
-	}
+	//Diamond Square
+	DiamondSquare();
 	
 	// Intialise vertex array
 	int i = 0;
@@ -181,7 +186,7 @@ void setup(void)
 		for (int x = 0; x < MAP_SIZE; x++)
 		{
 			// Set the coords (1st 4 elements) and a default colour of black (2nd 4 elements) 
-			terrainVertices[i] = { { (float)x, terrain[x][z], (float)z, 1.0 }, { 0.0, 0.0, 1.0, 1.0 } };
+			terrainVertices[i] = { { (float)x, terrain[x][z], (float)z, 1.0 }, { 0.0, 0.0, 1.0, 1.0 }, {randomFloat(0,1),randomFloat(0,1),randomFloat(0,1),1} };
 			i++;
 		}
 	}
@@ -224,10 +229,6 @@ void setup(void)
 	glUseProgram(programId);
 	///////////////////////////////////////
 
-	GLint loc = glGetUniformLocation(programId, "Colour");
-	float Colour[4] = {1,0,1,1};
-	glUniform4fv(loc, 1, Colour);
-
 	// Create vertex array object (VAO) and vertex buffer object (VBO) and associate data with vertex shader.
 	glGenVertexArrays(1, vao);
 	glGenBuffers(1, buffer);
@@ -239,6 +240,8 @@ void setup(void)
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(terrainVertices[0]), (GLvoid*)sizeof(terrainVertices[0].coords));
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(terrainVertices[0]), ((GLvoid*)sizeof(terrainVertices[0].colors)));
+	glEnableVertexAttribArray(2);
 	///////////////////////////////////////
 
 	// Obtain projection matrix uniform location and set value.
