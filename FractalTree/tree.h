@@ -21,5 +21,5 @@ private:
 	void genLeaves(int i);
 public:
 	tree() { branchesIterator = 0; };
-	int genTree(Vertex* drawVertices);
+	int genTree(Vertex* drawVertices, int startpoint);
 };

@@ -84,40 +84,43 @@ void tree::genLeaves(int leafID) {
 	leaves[leafID].right.coords[3] = 1;
 }
 
-int tree::genTree(Vertex* drawVertices)
+int tree::genTree(Vertex* drawVertices, int startPoint)
 {
-	drawVertices[0] = { { 0.0,-30.0f,0,1 } ,{ 0.3f,0.1f,0,1 } };
-	drawVertices[1] = { { 0.0, -15.0f, 0,1 },{ 0.3f,0.1f,0,1 } };
+	drawVertices[startPoint] = { { 0.0,-30.0f,0,1 } ,{ 0.3f,0.1f,0,1 } };
+	drawVertices[startPoint+1] = { { 0.0, -15.0f, 0,1 },{ 0.3f,0.1f,0,1 } };
 
-	fractalTree(5, drawVertices[0], drawVertices[1], 70);
-	cout << branchesIterator << endl;
+	fractalTree(5, drawVertices[startPoint], drawVertices[startPoint+1], 70);
+	cout << "Number of branches: "<<branchesIterator << endl;
 
 	int q = 0;
 	int leafIterator = 0;
-	int end_of_branches = 0;
-	for (int i = 2; i <= branchesIterator*2; i += 2) {
+	for (int i = startPoint+2; i <= branchesIterator*2 +1; i += 2) {
 		drawVertices[i] = branches[q].zero;
 		drawVertices[i + 1] = branches[q].one;
 		if (branches[q].end) {
-			end_of_branches++;
 			leaves[leafIterator].base = branches[q].one;
 			leafIterator++;
 		}
 		q++;
 	}
-
+	cout << "Number of leaves " << leafIterator << endl;
 	//GenLeaves
-	for (int i = 0; i < 16; i++) {
+	//Somereason always one extra leaf;
+	for (int i = 0; i < leafIterator; i++) {
 		genLeaves(i);
 	}
 	//Add leaves to buffer
 	int z = 0;
 	cout << branchesIterator * 2 + 2 << endl;
-	for (int i = branchesIterator * 2 +2; i <  (branchesIterator * 2+2) + 48; i += 3) {
+	for (int i = branchesIterator * 2 +2; i <  (branchesIterator * 2+2) + (leafIterator)*3; i += 3) {
 		drawVertices[i] = leaves[z].base;
 		drawVertices[i + 1] = leaves[z].left;
 		drawVertices[i + 2] = leaves[z].right;
 		z++;
 	}
+	cout << "Tree starts at: " << startPoint << endl;
+	cout << "Tree ends at: " << branchesIterator * 2 + 1 << endl;
+	cout << "Leaves start at: " << branchesIterator * 2 + 2 << endl;
+	cout << "Leaves ends at: " << ((branchesIterator * 2 + 2) + (leafIterator)* 3) << endl;
 	return 0;
 }
