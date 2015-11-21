@@ -18,7 +18,7 @@ private:
 	Branch branches[1000];
 	Leaf leaves[1000];
 	int branchesIterator;
-	void fractalTree(int count, Vertex zero, Vertex one, float Angle);
+	void fractalTree(int count, Vertex zero, Vertex one, float Angle, float rand);
 	void genLeaves(int i);
 	float randomFloat(float min, float max);
 public:
