@@ -22,32 +22,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Vertex.h"
+#include "Branch.h"
+#include "Leaf.h"
+
+#include "tree.h"
+
 #pragma comment(lib, "glew32.lib") 
 #endif
 
 using namespace std;
 
 using namespace glm;
-
-struct Vertex
-{
-   float coords[4];
-   float colors[4];
-};
-
-struct Branch
-{
-	Vertex zero;
-	Vertex one;
-	bool end;
-};
-
-struct Leaf
-{
-	Vertex base;
-	Vertex left;
-	Vertex right;
-};
 
 struct Matrix4x4
 {
@@ -187,6 +173,7 @@ void genTree() {
 	drawVertices[1] = { { 0.0, -15.0f, 0,1 },{ 0.3f,0.1f,0,1 } };
 
 	fractalTree(5, drawVertices[0], drawVertices[1], 70);
+	cout << branchesIterator << endl;
 
 	int q = 0;
 	int leafIterator = 0;
@@ -209,7 +196,7 @@ void genTree() {
 	}
 	//Add leaves to buffer
 	int z = 0;
-	for (int i = 256; i < 256 + 48; i+=3) {
+	for (int i = 62; i < 62 + 48; i+=3) {
 		drawVertices[i] = leaves[z].base;
 		drawVertices[i+1] = leaves[z].left;
 		drawVertices[i+2] = leaves[z].right;
@@ -222,7 +209,8 @@ void genTree() {
 void setup(void)
 {
 	genTree();
-
+	tree Tree;
+	Tree.genTree(drawVertices);
    glClearColor(1.0, 1.0, 1.0, 0.0);
 
    // Create shader program executable.
@@ -275,13 +263,12 @@ void drawScene(void)
    glClear(GL_COLOR_BUFFER_BIT);
    glLineWidth(8);
    //Draw tree
-   for (int i = 0; i < 256; i += 2) {
+   for (int i = 0; i < 62; i += 2) {
 	   glDrawArrays(GL_LINES, i, 2);
    }
    //Draw leaves
-   for (int i = 256; i < 256 + 48; i+=3) {
-	   glDrawArrays(GL_TRIANGLES, i, 3);
-   }
+   cout << drawVertices[63].coords[1] << endl;
+   glDrawArrays(GL_TRIANGLES, 62, 3);
    glFlush();
 }
 

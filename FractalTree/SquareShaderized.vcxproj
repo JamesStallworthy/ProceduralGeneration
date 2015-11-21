@@ -79,6 +79,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="squareShaderized.cpp" />
+    <ClCompile Include="tree.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Branch.h" />
+    <ClInclude Include="Leaf.h" />
+    <ClInclude Include="tree.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
