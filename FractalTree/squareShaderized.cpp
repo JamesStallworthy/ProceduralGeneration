@@ -93,7 +93,7 @@ void setup(void)
 {
 	//genTree();
 	tree Tree;
-	pos = Tree.genTree(drawVertices, 10, 8,70);
+	pos = Tree.genTree(drawVertices, 10, 8,70,30);
    glClearColor(1.0, 1.0, 1.0, 0.0);
 
    // Create shader program executable.

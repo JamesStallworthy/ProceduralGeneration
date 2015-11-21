@@ -18,10 +18,10 @@ private:
 	Branch branches[1000];
 	Leaf leaves[1000];
 	int branchesIterator;
-	void fractalTree(int count, Vertex zero, Vertex one, float Angle, float rand);
+	void fractalTree(int count, Vertex zero, Vertex one, float angleRight, float angleLeft, float rand);
 	void genLeaves(int i);
 	float randomFloat(float min, float max);
 public:
 	tree() { branchesIterator = 0; };
-	TreeBufferPos genTree(Vertex* drawVertices, int startpoint, int count, float angle);
+	TreeBufferPos genTree(Vertex* drawVertices, int startpoint, int count, float angleRight, float angleLeft);
 };
