@@ -85,6 +85,7 @@
     <ClInclude Include="Branch.h" />
     <ClInclude Include="Leaf.h" />
     <ClInclude Include="tree.h" />
+    <ClInclude Include="TreeBufferPos.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

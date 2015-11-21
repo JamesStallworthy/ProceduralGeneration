@@ -25,6 +25,7 @@
 #include "Vertex.h"
 #include "Branch.h"
 #include "Leaf.h"
+#include "TreeBufferPos.h"
 
 #include "tree.h"
 
@@ -54,10 +55,8 @@ static enum buffer {SQUARE_VERTICES};
 static enum object {SQUARE}; 
 
 // Globals
-Leaf leaves[16];
+TreeBufferPos pos;
 Vertex drawVertices[1000];
-Branch branches[1000];
-int branchesIterator = 0;
 
 static Matrix4x4
 modelViewMat = IDENTITY_MATRIX4x4;
@@ -94,7 +93,7 @@ void setup(void)
 {
 	//genTree();
 	tree Tree;
-	Tree.genTree(drawVertices,0);
+	pos = Tree.genTree(drawVertices, 10, 8,70);
    glClearColor(1.0, 1.0, 1.0, 0.0);
 
    // Create shader program executable.
@@ -147,11 +146,11 @@ void drawScene(void)
    glClear(GL_COLOR_BUFFER_BIT);
    glLineWidth(8);
    //Draw tree
-   for (int i = 0; i < 62; i += 2) {
+   for (int i = pos.treeStart; i < pos.treeFinish +1; i += 2) {
 	   glDrawArrays(GL_LINES, i, 2);
    }
    //Draw leaves
-   for (int i = 62; i < 62+48; i += 3) {
+   for (int i = pos.leafStart; i < pos.leafFinish; i += 3) {
 	   glDrawArrays(GL_TRIANGLES, i, 3);
    }
   

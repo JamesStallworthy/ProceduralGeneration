@@ -10,7 +10,7 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float Angle)
 		vec2 Scale = (One - Zero);
 		Scale = Scale * 0.8f;
 
-		float alpha = (Angle * 3.14 / 180);
+		float alpha = ((Angle + randomFloat(-5, 5))*3.14 / 180);
 		mat2x2 rotMatrix(cos(alpha / 2), sin(alpha / 2), -sin(alpha / 2), cos(alpha / 2));
 		vec2 Answer = rotMatrix * Scale;
 
@@ -42,7 +42,7 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float Angle)
 		Scale = One - Zero;
 		Scale = Scale * 0.8f;
 
-		alpha = (Angle * 3.14 / 180)*-1;
+		alpha = ((Angle + randomFloat(-10, 10))*3.14 / 180)*-1;
 		rotMatrix = mat2x2(cos(alpha / 2), sin(alpha / 2), -sin(alpha / 2), cos(alpha / 2));
 		Answer = rotMatrix * Scale;
 
@@ -84,17 +84,24 @@ void tree::genLeaves(int leafID) {
 	leaves[leafID].right.coords[3] = 1;
 }
 
-int tree::genTree(Vertex* drawVertices, int startPoint)
+float tree::randomFloat(float min, float max)
+{
+	float random = ((float)rand()) / (float)RAND_MAX;
+	float range = max - min;
+	return (random*range) + min;
+}
+
+TreeBufferPos tree::genTree(Vertex* drawVertices, int startPoint, int count, float angle)
 {
 	drawVertices[startPoint] = { { 0.0,-30.0f,0,1 } ,{ 0.3f,0.1f,0,1 } };
 	drawVertices[startPoint+1] = { { 0.0, -15.0f, 0,1 },{ 0.3f,0.1f,0,1 } };
 
-	fractalTree(5, drawVertices[startPoint], drawVertices[startPoint+1], 70);
+	fractalTree(count, drawVertices[startPoint], drawVertices[startPoint+1], angle);
 	cout << "Number of branches: "<<branchesIterator << endl;
 
 	int q = 0;
 	int leafIterator = 0;
-	for (int i = startPoint+2; i <= branchesIterator*2 +1; i += 2) {
+	for (int i = startPoint+2; i <= startPoint + branchesIterator*2 +1; i += 2) {
 		drawVertices[i] = branches[q].zero;
 		drawVertices[i + 1] = branches[q].one;
 		if (branches[q].end) {
@@ -111,16 +118,20 @@ int tree::genTree(Vertex* drawVertices, int startPoint)
 	}
 	//Add leaves to buffer
 	int z = 0;
-	cout << branchesIterator * 2 + 2 << endl;
-	for (int i = branchesIterator * 2 +2; i <  (branchesIterator * 2+2) + (leafIterator)*3; i += 3) {
+	for (int i = startPoint + branchesIterator * 2 +2; i < startPoint + (branchesIterator * 2+2) + (leafIterator)*3; i += 3) {
 		drawVertices[i] = leaves[z].base;
 		drawVertices[i + 1] = leaves[z].left;
 		drawVertices[i + 2] = leaves[z].right;
 		z++;
 	}
-	cout << "Tree starts at: " << startPoint << endl;
-	cout << "Tree ends at: " << branchesIterator * 2 + 1 << endl;
-	cout << "Leaves start at: " << branchesIterator * 2 + 2 << endl;
-	cout << "Leaves ends at: " << ((branchesIterator * 2 + 2) + (leafIterator)* 3) << endl;
-	return 0;
+	cout << "Tree starts at buffer: " << startPoint << endl;
+	cout << "Tree ends at buffer: " << startPoint+branchesIterator * 2 + 1 << endl;
+	cout << "Leaves start at buffer: " << startPoint+branchesIterator * 2 + 2 << endl;
+	cout << "Leaves ends at buffer: " << startPoint+((branchesIterator * 2 + 2) + (leafIterator)* 3) << endl;
+	TreeBufferPos pos;
+	pos.treeStart = startPoint;
+	pos.treeFinish = startPoint + branchesIterator * 2 + 1;
+	pos.leafStart = startPoint + branchesIterator * 2 + 2;
+	pos.leafFinish = startPoint + ((branchesIterator * 2 + 2) + (leafIterator)* 3);
+	return pos;
 }
