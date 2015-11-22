@@ -9,11 +9,7 @@
 #include <iostream>
 #include <fstream>
 
-#ifdef __APPLE__
-#  include <GL/glew.h>
-#  include <GL/freeglut.h>
-#  include <OpenGL/glext.h>
-#else
+
 #  include <GL/glew.h>
 #  include <GL/freeglut.h>
 #  include <GL/glext.h>
@@ -30,7 +26,6 @@
 #include "tree.h"
 
 #pragma comment(lib, "glew32.lib") 
-#endif
 
 using namespace std;
 
@@ -93,7 +88,7 @@ void setup(void)
 {
 	//genTree();
 	tree Tree;
-	pos = Tree.genTree(drawVertices, 10, 8,70,30);
+	pos = Tree.genTree(drawVertices, 2, 8,70,70);
    glClearColor(1.0, 1.0, 1.0, 0.0);
 
    // Create shader program executable.

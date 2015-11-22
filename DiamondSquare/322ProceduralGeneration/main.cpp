@@ -26,8 +26,8 @@ const int SCREEN_HEIGHT = 500;
 
 const int SEED = 4;
 
-const int START_RAND_AMOUNT = 1;
-const int RAND_AMOUNT = 2;
+const int START_RAND_AMOUNT = 5;
+const int RAND_AMOUNT = 5;
 
 struct Vertex
 {
