@@ -86,9 +86,10 @@ char* readTextFile(char* aTextFile)
 // Initialization routine.
 void setup(void)
 {
+	
 	//genTree();
 	tree Tree;
-	pos = Tree.genTree(drawVertices, 2, 8,70,70);
+	pos = Tree.genTree(drawVertices, 2, 8,60,60);
    glClearColor(1.0, 1.0, 1.0, 0.0);
 
    // Create shader program executable.
@@ -139,7 +140,7 @@ void setup(void)
 void drawScene(void)
 {
    glClear(GL_COLOR_BUFFER_BIT);
-   glLineWidth(8);
+   glLineWidth(1);
    //Draw tree
    for (int i = pos.treeStart; i < pos.treeFinish +1; i += 2) {
 	   glDrawArrays(GL_LINES, i, 2);

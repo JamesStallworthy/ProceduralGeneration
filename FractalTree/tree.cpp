@@ -9,8 +9,9 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 
 		vec2 Scale = (One - Zero);
 		Scale = Scale * 0.8f;
-
-		float alpha = ((angleRight + randomFloat(-rand, rand))*3.14 / 180);
+		float randValue = randomFloat(-rand, rand);
+		cout << randValue << endl;
+		float alpha = ((angleRight + randValue)*3.14 / 180);
 		mat2x2 rotMatrix(cos(alpha / 2), sin(alpha / 2), -sin(alpha / 2), cos(alpha / 2));
 		vec2 Answer = rotMatrix * Scale;
 
@@ -32,7 +33,7 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 			branches[branchesIterator].end = false;
 		branchesIterator++;
 
-		fractalTree(count, branches[branchesIterator - 1].zero, branches[branchesIterator - 1].one, angleRight, angleLeft, rand/2);
+		fractalTree(count, branches[branchesIterator - 1].zero, branches[branchesIterator - 1].one, angleRight, angleLeft, rand);
 
 		////////////////////////////////////////////////
 
@@ -41,7 +42,8 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 
 		Scale = One - Zero;
 		Scale = Scale * 0.8f;
-		alpha = ((angleLeft + randomFloat(-rand, rand))*3.14 / 180)*-1;
+		randValue = randomFloat(-rand, rand);
+		alpha = ((angleLeft +randValue)*3.14 / 180)*-1;
 		rotMatrix = mat2x2(cos(alpha / 2), sin(alpha / 2), -sin(alpha / 2), cos(alpha / 2));
 		Answer = rotMatrix * Scale;
 
@@ -62,7 +64,7 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 			branches[branchesIterator].end = false;
 		branchesIterator++;
 
-		fractalTree(count, branches[branchesIterator - 1].zero, branches[branchesIterator - 1].one, angleRight,angleLeft,rand/2);
+		fractalTree(count, branches[branchesIterator - 1].zero, branches[branchesIterator - 1].one, angleRight,angleLeft,rand);
 	}
 }
 void tree::genLeaves(int leafID) {
@@ -94,10 +96,10 @@ TreeBufferPos tree::genTree(Vertex* drawVertices, int startPoint, int count, flo
 {
 	drawVertices[startPoint] = { { 0.0,-30.0f,0,1 } ,{ 0.3f,0.1f,0,1 } };
 	drawVertices[startPoint+1] = { { 0.0, -15.0f, 0,1 },{ 0.3f,0.1f,0,1 } };
-
-	fractalTree(count, drawVertices[startPoint], drawVertices[startPoint+1], angleRight, angleLeft, 60);
+	srand(6511);
+	fractalTree(count, drawVertices[startPoint], drawVertices[startPoint+1], angleRight, angleLeft, 20);
+	
 	cout << "Number of branches: "<<branchesIterator << endl;
-
 	int q = 0;
 	int leafIterator = 0;
 	for (int i = startPoint+2; i <= startPoint + branchesIterator*2 +1; i += 2) {
