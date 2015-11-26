@@ -91,7 +91,7 @@ void setup(void)
 	
 	//genTree();
 	tree Tree;
-	pos = Tree.genTree(drawVertices, 0, 8,30,30);
+	pos = Tree.genTree(drawVertices, 0, 8,25,25);
    glClearColor(1.0, 1.0, 1.0, 0.0);
 
    // Create shader program executable.
@@ -143,10 +143,11 @@ void drawScene(void)
 {
    glClear(GL_COLOR_BUFFER_BIT);
    //Draw tree
-   cout << pos.depth.size() << endl;
+   int q = 0;
    for (int i = pos.treeStart; i < pos.treeFinish +1; i += 2) {
-	   glLineWidth( pos.depth[(i-1)/2]);
+	   glLineWidth( pos.depth[(q-1)/2]);
 	   glDrawArrays(GL_LINES, i, 2);
+	   q += 2;
    }
    //Draw leaves
    for (int i = pos.leafStart; i < pos.leafFinish; i += 4) {
