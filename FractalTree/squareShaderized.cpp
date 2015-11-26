@@ -18,6 +18,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <vector>
+
 #include "Vertex.h"
 #include "Branch.h"
 #include "Leaf.h"
@@ -51,7 +53,7 @@ static enum object {SQUARE};
 
 // Globals
 TreeBufferPos pos;
-Vertex drawVertices[1000];
+Vertex drawVertices[2000];
 
 static Matrix4x4
 modelViewMat = IDENTITY_MATRIX4x4;
@@ -89,7 +91,7 @@ void setup(void)
 	
 	//genTree();
 	tree Tree;
-	pos = Tree.genTree(drawVertices, 2, 8,60,60);
+	pos = Tree.genTree(drawVertices, 0, 8,30,30);
    glClearColor(1.0, 1.0, 1.0, 0.0);
 
    // Create shader program executable.
@@ -140,14 +142,15 @@ void setup(void)
 void drawScene(void)
 {
    glClear(GL_COLOR_BUFFER_BIT);
-   glLineWidth(1);
    //Draw tree
+   cout << pos.depth.size() << endl;
    for (int i = pos.treeStart; i < pos.treeFinish +1; i += 2) {
+	   glLineWidth( pos.depth[(i-1)/2]);
 	   glDrawArrays(GL_LINES, i, 2);
    }
    //Draw leaves
-   for (int i = pos.leafStart; i < pos.leafFinish; i += 3) {
-	   glDrawArrays(GL_TRIANGLES, i, 3);
+   for (int i = pos.leafStart; i < pos.leafFinish; i += 4) {
+	   glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
    }
   
    glFlush();

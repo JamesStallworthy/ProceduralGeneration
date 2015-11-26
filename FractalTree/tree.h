@@ -8,6 +8,7 @@
 #include "Branch.h"
 #include "Leaf.h"
 #include "TreeBufferPos.h"
+#include <vector>
 
 using namespace std;
 using namespace glm;
@@ -21,6 +22,7 @@ private:
 	void fractalTree(int count, Vertex zero, Vertex one, float angleRight, float angleLeft, float rand);
 	void genLeaves(int i);
 	float randomFloat(float min, float max);
+	vector <int> depth;
 public:
 	tree() { branchesIterator = 0; };
 	TreeBufferPos genTree(Vertex* drawVertices, int startpoint, int count, float angleRight, float angleLeft);

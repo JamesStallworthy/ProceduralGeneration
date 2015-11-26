@@ -6,4 +6,5 @@ struct Leaf
 	Vertex base;
 	Vertex left;
 	Vertex right;
+	Vertex top;
 };

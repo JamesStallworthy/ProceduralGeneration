@@ -1,4 +1,5 @@
 #include "tree.h"
+#include <time.h>
 
 void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, float angleLeft, float rand)
 {
@@ -10,10 +11,9 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 		vec2 Scale = (One - Zero);
 		Scale = Scale * 0.8f;
 		float randValue = randomFloat(-rand, rand);
-		cout << randValue << endl;
 		float alpha = ((angleRight + randValue)*3.14 / 180);
-		mat2x2 rotMatrix(cos(alpha / 2), sin(alpha / 2), -sin(alpha / 2), cos(alpha / 2));
-		vec2 Answer = rotMatrix * Scale;
+		mat2x2 rotMatrix(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
+		vec2 Answer = Scale * rotMatrix;
 
 		Answer = Answer + One;
 
@@ -32,7 +32,7 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 		else
 			branches[branchesIterator].end = false;
 		branchesIterator++;
-
+		depth.push_back(count);
 		fractalTree(count, branches[branchesIterator - 1].zero, branches[branchesIterator - 1].one, angleRight, angleLeft, rand);
 
 		////////////////////////////////////////////////
@@ -44,8 +44,8 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 		Scale = Scale * 0.8f;
 		randValue = randomFloat(-rand, rand);
 		alpha = ((angleLeft +randValue)*3.14 / 180)*-1;
-		rotMatrix = mat2x2(cos(alpha / 2), sin(alpha / 2), -sin(alpha / 2), cos(alpha / 2));
-		Answer = rotMatrix * Scale;
+		rotMatrix = mat2x2(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
+		Answer = Scale * rotMatrix;
 
 		Answer = Answer + One;
 		branches[branchesIterator].zero = one;
@@ -63,26 +63,40 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 		else
 			branches[branchesIterator].end = false;
 		branchesIterator++;
-
+		depth.push_back(count);
 		fractalTree(count, branches[branchesIterator - 1].zero, branches[branchesIterator - 1].one, angleRight,angleLeft,rand);
 	}
 }
 void tree::genLeaves(int leafID) {
 	//Colour
-	leaves[leafID].base.colors[1] = 1.0f;
-	leaves[leafID].left.colors[1] = 1.0f;
-	leaves[leafID].right.colors[1] = 1.0f;
+	leaves[leafID].base.colors[1] = 0.5f;
+	leaves[leafID].left.colors[1] = 0.6f;
+	leaves[leafID].right.colors[1] = 0.6f;
+	leaves[leafID].top.colors[1] = 1.0f;
 	//Coords
-	leaves[leafID].left.coords[0] = leaves[leafID].base.coords[0] - 2;
-	leaves[leafID].left.coords[1] = leaves[leafID].base.coords[1] + 2;
+	vec2 left(- 2,  2);
+	vec2 right(2,2);
+	vec2 top(0,  5);
+	float alpha = randomFloat(0,360);
+	mat2x2 rotMatrix(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
+	left = left * rotMatrix;
+	right = right * rotMatrix;
+	top = top * rotMatrix;
+
+	leaves[leafID].left.coords[0] = leaves[leafID].base.coords[0] + left.x;
+	leaves[leafID].left.coords[1] = leaves[leafID].base.coords[1] + left.y;
 	leaves[leafID].left.coords[2] = 0;
-	leaves[leafID].right.coords[0] = leaves[leafID].base.coords[0] + 2;
-	leaves[leafID].right.coords[1] = leaves[leafID].base.coords[1] + 2;
+	leaves[leafID].right.coords[0] = leaves[leafID].base.coords[0] + right.x;
+	leaves[leafID].right.coords[1] = leaves[leafID].base.coords[1] + right.y;
 	leaves[leafID].right.coords[2] = 0;
+	leaves[leafID].top.coords[0] = leaves[leafID].base.coords[0] + top.x;
+	leaves[leafID].top.coords[1] = leaves[leafID].base.coords[1] + top.y;
+	leaves[leafID].top.coords[2] = 0;
 	//4th value in coord needs to be 1
 	leaves[leafID].base.coords[3] = 1;
 	leaves[leafID].left.coords[3] = 1;
 	leaves[leafID].right.coords[3] = 1;
+	leaves[leafID].top.coords[3] = 1;
 }
 
 float tree::randomFloat(float min, float max)
@@ -96,7 +110,7 @@ TreeBufferPos tree::genTree(Vertex* drawVertices, int startPoint, int count, flo
 {
 	drawVertices[startPoint] = { { 0.0,-30.0f,0,1 } ,{ 0.3f,0.1f,0,1 } };
 	drawVertices[startPoint+1] = { { 0.0, -15.0f, 0,1 },{ 0.3f,0.1f,0,1 } };
-	srand(6511);
+	srand(time(0));
 	fractalTree(count, drawVertices[startPoint], drawVertices[startPoint+1], angleRight, angleLeft, 20);
 	
 	cout << "Number of branches: "<<branchesIterator << endl;
@@ -119,20 +133,22 @@ TreeBufferPos tree::genTree(Vertex* drawVertices, int startPoint, int count, flo
 	}
 	//Add leaves to buffer
 	int z = 0;
-	for (int i = startPoint + branchesIterator * 2 +2; i < startPoint + (branchesIterator * 2+2) + (leafIterator)*3; i += 3) {
+	for (int i = startPoint + branchesIterator * 2 +2; i < startPoint + (branchesIterator * 2+2) + (leafIterator)*4; i += 4) {
 		drawVertices[i] = leaves[z].base;
 		drawVertices[i + 1] = leaves[z].left;
 		drawVertices[i + 2] = leaves[z].right;
+		drawVertices[i + 3] = leaves[z].top;
 		z++;
 	}
 	cout << "Tree starts at buffer: " << startPoint << endl;
 	cout << "Tree ends at buffer: " << startPoint+branchesIterator * 2 + 1 << endl;
 	cout << "Leaves start at buffer: " << startPoint+branchesIterator * 2 + 2 << endl;
-	cout << "Leaves ends at buffer: " << startPoint+((branchesIterator * 2 + 2) + (leafIterator)* 3) << endl;
+	cout << "Leaves ends at buffer: " << startPoint+((branchesIterator * 2 + 2) + (leafIterator)* 4) << endl;
 	TreeBufferPos pos;
 	pos.treeStart = startPoint;
 	pos.treeFinish = startPoint + branchesIterator * 2 + 1;
 	pos.leafStart = startPoint + branchesIterator * 2 + 2;
-	pos.leafFinish = startPoint + ((branchesIterator * 2 + 2) + (leafIterator)* 3);
+	pos.leafFinish = startPoint + ((branchesIterator * 2 + 2) + (leafIterator)* 4);
+	pos.depth = depth;
 	return pos;
 }
