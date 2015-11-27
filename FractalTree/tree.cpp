@@ -77,6 +77,8 @@ void tree::genLeaves(int leafID) {
 	vec2 left(- 2,  2);
 	vec2 right(2,2);
 	vec2 top(0,  5);
+
+	//Rotate
 	float alpha = randomFloat(0,360);
 	mat2x2 rotMatrix(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
 	left = left * rotMatrix;
