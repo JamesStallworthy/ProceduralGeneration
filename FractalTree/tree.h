@@ -16,8 +16,8 @@ using namespace glm;
 
 class tree {
 private:
-	Branch branches[1000];
-	Leaf leaves[1000];
+	Branch branches[2000];
+	Leaf leaves[2000];
 	int branchesIterator;
 	void fractalTree(int count, Vertex zero, Vertex one, float angleRight, float angleLeft, float rand);
 	void genLeaves(int i);

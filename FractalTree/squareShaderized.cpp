@@ -62,6 +62,7 @@ static mat4 projMat = mat4(1.0);
 const float SPEED = 1;
 const float ROTSPEED = 2;
 float cameraTheta = 0;
+float cameraPhi = 0;
 vec3 cameraPos(0, 0, 100);
 //Line of sight
 vec3 LOS(0, 0, -1);
@@ -98,9 +99,10 @@ void setup(void)
 	
 	//genTree();
 	tree Tree;
-	pos = Tree.genTree(drawVertices, 0, 8,25,25);
+	//pos = Tree.genTree(drawVertices, 0, 8,25,25);
+	pos = Tree.genTree(drawVertices, 0, 8, 15, 15);
    glClearColor(1.0, 1.0, 1.0, 0.0);
-
+   glEnable(GL_DEPTH_TEST);
    // Create shader program executable.
    char* vertexShader = readTextFile("vertexShader.glsl");
    vertexShaderId = glCreateShader(GL_VERTEX_SHADER); 
@@ -150,17 +152,22 @@ void setup(void)
 // Drawing routine.
 void drawScene(void)
 {
-	LOS.x = sin(cameraTheta*3.14/180);
+	/*LOS.x = sin(cameraTheta*3.14/180);
 	LOS.z = -cos(cameraTheta*3.14/180);
-	LOS = glm::normalize(LOS);
+	LOS = glm::normalize(LOS);*/
+
+	LOS.x = cos(cameraPhi*3.14 / 180)* sin(cameraTheta*3.14 / 180);
+	LOS.y = sin(cameraPhi*3.14 / 180);
+	LOS.z = cos(cameraPhi*3.14 / 180) * -cos(cameraTheta*3.14 / 180);
+
 	modelViewMat = lookAt(vec3(cameraPos.x, cameraPos.y, cameraPos.z), vec3(cameraPos.x+LOS.x, cameraPos.y+LOS.y, cameraPos.z + LOS.z), vec3(0, 1, 0));
 	glUniformMatrix4fv(modelViewMatLoc, 1, GL_FALSE, value_ptr(modelViewMat));
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     //Draw tree
 	//glDrawArrays(GL_LINES, 0, pos.treeFinish+1);
     int q = 0;
     for (int i = pos.treeStart; i < pos.treeFinish +1; i += 2) {
-	    glLineWidth( pos.depth[(q-1)/2]);
+	    glLineWidth( (pos.depth[(q-1)/2])*2);
 	    glDrawArrays(GL_LINES, i, 2);
 	    q += 2;
    }
@@ -208,6 +215,14 @@ void keyInput(unsigned char key, int x, int y)
 			break;
 		case 100:
 			cameraTheta+=ROTSPEED;
+			glutPostRedisplay();
+			break;
+		case 113:
+			cameraPhi += ROTSPEED;
+			glutPostRedisplay();
+			break;
+		case 122:
+			cameraPhi -= ROTSPEED;
 			glutPostRedisplay();
 			break;
 		case 114:

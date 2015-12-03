@@ -5,15 +5,19 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 {
 	count--;
 	if (count > 0) {
-		vec2 Zero(zero.coords[0], zero.coords[1]);
-		vec2 One(one.coords[0], one.coords[1]);
+		vec3 Zero(zero.coords[0], zero.coords[1],zero.coords[2]);
+		vec3 One(one.coords[0], one.coords[1], one.coords[2]);
 
-		vec2 Scale = (One - Zero);
+		vec3 Scale = (One - Zero);
 		Scale = Scale * 0.8f;
 		float randValue = randomFloat(-rand, rand);
 		float alpha = ((angleRight + randValue)*3.14 / 180);
-		mat2x2 rotMatrix(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
-		vec2 Answer = Scale * rotMatrix;
+		//mat3x3 rotMatrix(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
+		mat3x3 rotMatrixZ(cos(alpha), sin(alpha),0, -sin(alpha), cos(alpha),0,0,0,1);
+		float randValue2 = randomFloat(-rand, rand);
+		float beta = ((angleRight + randValue2)*3.14 / 180);
+		mat3x3 rotMatrixX(1, 0, 0, 0, cos(beta), sin(beta), 0, -sin(beta), cos(beta));
+		vec3 Answer = (Scale * rotMatrixZ)*rotMatrixX;
 
 		Answer = Answer + One;
 
@@ -22,7 +26,7 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 		branches[branchesIterator].zero.colors[1] = 0.1f;
 		branches[branchesIterator].one.coords[0] = Answer.x;
 		branches[branchesIterator].one.coords[1] = Answer.y;
-		branches[branchesIterator].one.coords[2] = 0;
+		branches[branchesIterator].one.coords[2] = Answer.z;
 		branches[branchesIterator].one.coords[3] = 1;
 		branches[branchesIterator].one.coords[3] = 1;
 		branches[branchesIterator].one.colors[0] = 0.3f;
@@ -37,15 +41,18 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 
 		////////////////////////////////////////////////
 
-		Zero = vec2(zero.coords[0], zero.coords[1]);
-		One = vec2(one.coords[0], one.coords[1]);
+		Zero = vec3(zero.coords[0], zero.coords[1], zero.coords[2]);
+		One = vec3(one.coords[0], one.coords[1], one.coords[2]);
 
 		Scale = One - Zero;
 		Scale = Scale * 0.8f;
 		randValue = randomFloat(-rand, rand);
 		alpha = ((angleLeft +randValue)*3.14 / 180)*-1;
-		rotMatrix = mat2x2(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
-		Answer = Scale * rotMatrix;
+		rotMatrixZ = mat3x3(cos(alpha), sin(alpha),0, -sin(alpha), cos(alpha),0,0,0,1);
+		randValue2 = randomFloat(-rand, rand);
+		beta = ((angleLeft + randValue2)*3.14 / 180)*-1;
+		rotMatrixX = mat3x3(1, 0, 0, 0, cos(beta), sin(beta), 0, -sin(beta), cos(beta));
+		Answer = (Scale * rotMatrixZ)*rotMatrixX;
 
 		Answer = Answer + One;
 		branches[branchesIterator].zero = one;
@@ -53,7 +60,7 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 		branches[branchesIterator].zero.colors[1] = 0.1f;
 		branches[branchesIterator].one.coords[0] = Answer.x;
 		branches[branchesIterator].one.coords[1] = Answer.y;
-		branches[branchesIterator].one.coords[2] = 0;
+		branches[branchesIterator].one.coords[2] = Answer.z;
 		branches[branchesIterator].one.coords[3] = 1;
 		branches[branchesIterator].one.coords[3] = 1;
 		branches[branchesIterator].one.colors[0] = 0.3f;
@@ -87,13 +94,13 @@ void tree::genLeaves(int leafID) {
 
 	leaves[leafID].left.coords[0] = leaves[leafID].base.coords[0] + left.x;
 	leaves[leafID].left.coords[1] = leaves[leafID].base.coords[1] + left.y;
-	leaves[leafID].left.coords[2] = 0;
+	leaves[leafID].left.coords[2] = leaves[leafID].base.coords[2];
 	leaves[leafID].right.coords[0] = leaves[leafID].base.coords[0] + right.x;
 	leaves[leafID].right.coords[1] = leaves[leafID].base.coords[1] + right.y;
-	leaves[leafID].right.coords[2] = 0;
+	leaves[leafID].right.coords[2] = leaves[leafID].base.coords[2];;
 	leaves[leafID].top.coords[0] = leaves[leafID].base.coords[0] + top.x;
 	leaves[leafID].top.coords[1] = leaves[leafID].base.coords[1] + top.y;
-	leaves[leafID].top.coords[2] = 0;
+	leaves[leafID].top.coords[2] = leaves[leafID].base.coords[2];;
 	//4th value in coord needs to be 1
 	leaves[leafID].base.coords[3] = 1;
 	leaves[leafID].left.coords[3] = 1;
