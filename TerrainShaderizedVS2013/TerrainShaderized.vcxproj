@@ -82,11 +82,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="getbmp.cpp" />
     <ClCompile Include="TerrainGeneration.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragmentShader.glsl" />
     <Text Include="vertexShader.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="getbmp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

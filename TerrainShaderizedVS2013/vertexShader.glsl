@@ -1,7 +1,8 @@
 #version 430 core
 
 layout(location=0) in vec4 squareCoords;
-layout(location=1) in vec4 squareColors;
+layout(location=1) in vec3 squareNormals;
+layout(location=2) in vec2 squareTexCoords;
 
 struct Material
 {
@@ -20,10 +21,14 @@ struct Light
 	vec4 coords;
 };
 
+uniform mat3 normalMat;
+
 uniform mat4 projMat;
 uniform mat4 modelViewMat;
 
-flat out vec4 colorsExport;
+smooth out vec4 colorsExport;
+
+out vec2 texCoordsExport;
 
 uniform Material terrainFandB;
 
@@ -33,6 +38,9 @@ uniform vec4 globAmb;
 
 void main(void)
 {
-   gl_Position = projMat * modelViewMat * squareCoords;
-   colorsExport = globAmb * terrainFandB.ambRefl;
+	texCoordsExport = squareTexCoords;
+    gl_Position = projMat * modelViewMat * squareCoords;
+    vec3 normal = normalize(normalMat * squareNormals);
+	vec3 lightDirection = normalize(vec3(light0.coords));
+	colorsExport =globAmb * terrainFandB.ambRefl* max(dot(normal, lightDirection), 0.0f);
 }

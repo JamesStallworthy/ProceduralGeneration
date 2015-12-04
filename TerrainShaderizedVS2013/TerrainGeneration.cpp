@@ -11,12 +11,16 @@
 #include <GL/glext.h>
 #pragma comment(lib, "glew32.lib") 
 
+#include "getbmp.h"
+
+#include <vector>
+
 using namespace std;
 
 using namespace glm;
 
 // Size of the terrain
-const int MAP_SIZE = 33;
+const int MAP_SIZE = 2049;
 
 const int SCREEN_WIDTH = 500;
 const int SCREEN_HEIGHT = 500;
@@ -28,12 +32,13 @@ const int RAND_AMOUNT = 5;
 
 float terrain[MAP_SIZE][MAP_SIZE] = {};
 
-static const vec4 globAmb = vec4(0.2, 0.2, 0.2, 1.0);
+static const vec4 globAmb = vec4(0.9, 0.9, 0.9, 1.0);
 
 struct Vertex
 {
 	float coords[4];
 	float normals[3];
+	float texCoords[2];
 };
 
 struct Material
@@ -89,7 +94,18 @@ modelViewMatLoc,
 projMatLoc,
 buffer[1],
 vao[1],
-normalMatLoc;
+normalMatLoc,
+texture[1],
+grassTexLoc;
+
+//Camera
+const float SPEED = 1;
+const float ROTSPEED = 2;
+float cameraTheta = 0;
+float cameraPhi = 0;
+vec3 cameraPos(0, 0, 100);
+//Line of sight
+vec3 LOS(0, 0, -1);
 
 static const Material terrainFandB =
 {
@@ -106,7 +122,8 @@ static const Light light0 =
 	vec4(1.0, 1.0, 1.0, 1.0),
 	vec4(1.0, 1.0, 1.0, 1.0),
 	vec4(1.0, 1.0, 0.0, 0.0)
-};
+};mat4 modelViewMat = mat4(1.0);
+static BitMapFile *image[1]; // Local storage for bmp image data.
 
 float randomFloat(float min, float max) {
 	float random = ((float)rand()) / (float)RAND_MAX;
@@ -217,6 +234,57 @@ void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar
 	projMat = frustum(-fW, fW, -fH, fH, zNear, zFar);
 }
 
+void shaderCompileTest(GLuint shader)
+{
+	GLint result = GL_FALSE;
+	int logLength;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+	std::vector<GLchar> vertShaderError((logLength > 1) ? logLength : 1);
+	glGetShaderInfoLog(shader, logLength, NULL, &vertShaderError[0]);
+	std::cout << &vertShaderError[0] << std::endl;
+}
+// Keyboard input processing routine.
+void keyInput(unsigned char key, int x, int y)
+{
+	switch (key)
+	{
+	case 27:
+		exit(0);
+		break;
+	case 119://Forward
+		cameraPos.x += LOS.x * SPEED;
+		cameraPos.z += LOS.z * SPEED;
+		cameraPos.y += LOS.y * SPEED;
+		glutPostRedisplay();
+		break;
+	case 115:
+		cameraPos.x -= LOS.x * SPEED;
+		cameraPos.z -= LOS.z * SPEED;
+		cameraPos.y -= LOS.y * SPEED;
+		glutPostRedisplay();
+		break;
+	case 97:
+		cameraTheta -= ROTSPEED;
+		glutPostRedisplay();
+		break;
+	case 100:
+		cameraTheta += ROTSPEED;
+		glutPostRedisplay();
+		break;
+	case 113:
+		cameraPhi += ROTSPEED;
+		glutPostRedisplay();
+		break;
+	case 122:
+		cameraPhi -= ROTSPEED;
+		glutPostRedisplay();
+		break;
+	default:
+		break;
+	}
+}
+
 // Initialization routine.
 void setup(void)
 {
@@ -237,12 +305,19 @@ void setup(void)
 	// Intialise vertex array
 	int i = 0;
 
+	// Generate texture co-ordinates
+	float fTextureS = float(MAP_SIZE)*0.1f;
+	float fTextureT = float(MAP_SIZE)*0.1f;
+
 	for (int z = 0; z < MAP_SIZE; z++)
 	{
 		for (int x = 0; x < MAP_SIZE; x++)
 		{
 			// Set the coords (1st 4 elements) and a default colour of black (2nd 4 elements) 
 			terrainVertices[i] = { { (float)x, terrain[x][z], (float)z, 1.0 },{ tempNormals[x][z].x, tempNormals[x][z].y, tempNormals[x][z].z } };
+			float fScaleC = float(x) / float(MAP_SIZE - 1);
+			float fScaleR = float(z) / float(MAP_SIZE - 1);
+			terrainVertices[i].texCoords[0] = fTextureS*fScaleC;			terrainVertices[i].texCoords[1] = fTextureT*fScaleR;
 			i++;
 		}
 	}
@@ -263,7 +338,8 @@ void setup(void)
 			i++;
 		}
 	}
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 
@@ -284,6 +360,10 @@ void setup(void)
 	glLinkProgram(programId);
 	glUseProgram(programId);
 	///////////////////////////////////////
+	cout << "Vertex:" << endl;
+	shaderCompileTest(vertexShaderId);
+	cout << "Fragment:" << endl;
+	shaderCompileTest(fragmentShaderId);
 
 	// Create vertex array object (VAO) and vertex buffer object (VBO) and associate data with vertex shader.
 	glGenVertexArrays(1, vao);
@@ -296,12 +376,9 @@ void setup(void)
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(terrainVertices[0]), (GLvoid*)sizeof(terrainVertices[0].coords));
 	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(terrainVertices[0]),(GLvoid*)(sizeof(terrainVertices[0].coords) + sizeof(terrainVertices[0].normals)));
+	glEnableVertexAttribArray(2);
 	///////////////////////////////////////
-
-	// Obtain projection matrix uniform location and set value.
-	projMatLoc = glGetUniformLocation(programId, "projMat");
-	perspectiveGL(60, (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1, 100);
-	glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, value_ptr(projMat));
 
 	glUniform4fv(glGetUniformLocation(programId, "terrainFandB.ambRefl"), 1,
 		&terrainFandB.ambRefl[0]);
@@ -328,21 +405,44 @@ void setup(void)
 
 	///////////////////////////////////////
 
+	// Obtain projection matrix uniform location and set value.
+	projMatLoc = glGetUniformLocation(programId, "projMat");
+	projMat = glm::perspective(1.0472, 1.0, 0.1, 200.0);
+	glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, value_ptr(projMat));
 	// Obtain modelview matrix uniform location and set value.
-	mat4 modelViewMat = mat4(1.0);
-	// Move terrain into view - glm::translate replaces glTranslatef
-	//modelViewMat = translate(modelViewMat, vec3(5, -2.5f, -40.0f)); // 5x5 grid
-	modelViewMat = translate(modelViewMat, vec3(-10.0f, -15.0f, -60.0f));
+	modelViewMat = lookAt(vec3(0, 0, 100), vec3(0, -15, 0), vec3(0, 1, 0));
 	modelViewMatLoc = glGetUniformLocation(programId, "modelViewMat");
 	glUniformMatrix4fv(modelViewMatLoc, 1, GL_FALSE, value_ptr(modelViewMat));	normalMat = transpose(inverse(mat3(modelViewMat)));
 	glUniformMatrix3fv(normalMatLoc, 1, GL_FALSE, value_ptr(normalMat));
 	///////////////////////////////////////
+	// Texture loading
+	// Load the image.
+	image[0] = getbmp("Grass.bmp");
+	// Create texture id.
+	glGenTextures(1, texture);
+	// Bind grass image.
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image[0]->sizeX, image[0]->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image[0]->data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	grassTexLoc = glGetUniformLocation(programId, "grassTex");
+	glUniform1i(grassTexLoc, 0);
+
 	///////////////////////////////////////
 }
 
 // Drawing routine.
 void drawScene(void)
 {
+	LOS.x = cos(cameraPhi*3.14 / 180)* sin(cameraTheta*3.14 / 180);
+	LOS.y = sin(cameraPhi*3.14 / 180);
+	LOS.z = cos(cameraPhi*3.14 / 180) * -cos(cameraTheta*3.14 / 180);
+
+	modelViewMat = lookAt(vec3(cameraPos.x, cameraPos.y, cameraPos.z), vec3(cameraPos.x + LOS.x, cameraPos.y + LOS.y, cameraPos.z + LOS.z), vec3(0, 1, 0));
+	glUniformMatrix4fv(modelViewMatLoc, 1, GL_FALSE, value_ptr(modelViewMat));
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// For each row - draw the triangle strip
@@ -360,18 +460,6 @@ void resize(int w, int h)
 	glViewport(0, 0, w, h);
 }
 
-// Keyboard input processing routine.
-void keyInput(unsigned char key, int x, int y)
-{
-	switch (key)
-	{
-	case 27:
-		exit(0);
-		break;
-	default:
-		break;
-	}
-}
 
 // Main routine.
 int main(int argc, char* argv[])
