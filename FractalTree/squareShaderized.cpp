@@ -96,11 +96,8 @@ char* readTextFile(char* aTextFile)
 // Initialization routine.
 void setup(void)
 {
-	
-	//genTree();
 	tree Tree;
-	//pos = Tree.genTree(drawVertices, 0, 8,25,25);
-	pos = Tree.genTree(drawVertices, 0, 8, 15, 15);
+	pos = Tree.genTree(drawVertices, 0, 8, 10, 10);
    glClearColor(1.0, 1.0, 1.0, 0.0);
    glEnable(GL_DEPTH_TEST);
    // Create shader program executable.
@@ -202,11 +199,13 @@ void keyInput(unsigned char key, int x, int y)
 		case 119://Forward
 			cameraPos.x += LOS.x * SPEED;
 			cameraPos.z += LOS.z * SPEED;
+			cameraPos.y += LOS.y * SPEED;
 			glutPostRedisplay();
 			break;
 		case 115:
 			cameraPos.x -= LOS.x * SPEED;
 			cameraPos.z -= LOS.z * SPEED;
+			cameraPos.y -= LOS.y * SPEED;
 			glutPostRedisplay();
 			break;
 		case 97:
