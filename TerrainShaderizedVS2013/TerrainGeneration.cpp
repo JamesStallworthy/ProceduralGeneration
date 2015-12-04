@@ -33,7 +33,7 @@ static const vec4 globAmb = vec4(0.2, 0.2, 0.2, 1.0);
 struct Vertex
 {
 	float coords[4];
-	float colors[4];
+	float normals[3];
 };
 
 struct Material
@@ -88,7 +88,8 @@ fragmentShaderId,
 modelViewMatLoc,
 projMatLoc,
 buffer[1],
-vao[1];
+vao[1],
+normalMatLoc;
 
 static const Material terrainFandB =
 {
@@ -112,6 +113,27 @@ float randomFloat(float min, float max) {
 	float range = max - min;
 	return (random*range) + min;
 }
+vec3 tempNormals[MAP_SIZE][MAP_SIZE];
+
+void CalcNormal()
+{
+	for (int x = 0; x < MAP_SIZE; x++) {
+		for (int z = 0; z < MAP_SIZE; z++) {
+			if ((z + 1 == MAP_SIZE) && (x + 1 == MAP_SIZE)) {
+				tempNormals[x][z] = glm::normalize(glm::cross(glm::normalize(vec3(0, terrain[x][z - 1] - terrain[x][z], -1)), glm::normalize(vec3(-1, terrain[x - 1][z] - terrain[x][z], 0))));
+			}
+			else if (x + 1 == MAP_SIZE) {
+				tempNormals[x][z] = glm::normalize(glm::cross(glm::normalize(vec3(0, terrain[x][z + 1] - terrain[x][z], 1)), glm::normalize(vec3(-1, terrain[x - 1][z] - terrain[x][z], 0))));
+			}
+			else if (z + 1 == MAP_SIZE) {
+				tempNormals[x][z] = glm::normalize(glm::cross(glm::normalize(vec3(0, terrain[x][z - 1] - terrain[x][z], -1)), glm::normalize(vec3(1, terrain[x + 1][z] - terrain[x][z], 0))));
+			}
+			else {
+				tempNormals[x][z] = glm::normalize(glm::cross(glm::normalize(vec3(0, terrain[x][z + 1] - terrain[x][z], 1)), glm::normalize(vec3(1, terrain[x + 1][z] - terrain[x][z], 0))));
+			}
+		}
+	}
+}
 
 //DiamondSquare
 void Diamond(int x1, int y1, int width, int iteration) {
@@ -131,15 +153,15 @@ void Square(int x1, int y1, int width, int iteration) {
 	else
 		terrain[x1][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1][y1 + width] + terrain[x1 - width / 2][y1 + width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	//Right
-	if (x1 + width + width / 2 > MAP_SIZE - 1)
+	if (x1 +  width / 2 > MAP_SIZE - 1)
 		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	else
-		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width] + terrain[x1 + width + width / 2][y1 + width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width] + terrain[x1 + width / 2][y1 + width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	//Bottom
-	if (y1 + width + width / 2 > MAP_SIZE)
+	if (y1 + width / 2 > MAP_SIZE)
 		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 	else
-		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width] + terrain[x1 + width / 2][y1 + width + width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width] + terrain[x1 + width / 2][y1 +  width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
 }
 void DiamondSquare() {
 	terrain[0][0] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
@@ -209,6 +231,8 @@ void setup(void)
 	srand(SEED);
 	//Diamond Square
 	DiamondSquare();
+	CalcNormal();
+
 
 	// Intialise vertex array
 	int i = 0;
@@ -218,7 +242,7 @@ void setup(void)
 		for (int x = 0; x < MAP_SIZE; x++)
 		{
 			// Set the coords (1st 4 elements) and a default colour of black (2nd 4 elements) 
-			terrainVertices[i] = { { (float)x, terrain[x][z], (float)z, 1.0 },{ 0.0, 0.0, 1.0, 1.0 } };
+			terrainVertices[i] = { { (float)x, terrain[x][z], (float)z, 1.0 },{ tempNormals[x][z].x, tempNormals[x][z].y, tempNormals[x][z].z } };
 			i++;
 		}
 	}
@@ -299,7 +323,8 @@ void setup(void)
 	glUniform4fv(glGetUniformLocation(programId, "light0.specCols"), 1,
 		&light0.specCols[0]);
 	glUniform4fv(glGetUniformLocation(programId, "light0.coords"), 1,
-		&light0.coords[0]);
+		&light0.coords[0]);	mat3 normalMat = mat3(1);
+	normalMatLoc = glGetUniformLocation(programId, "normalMat");
 
 	///////////////////////////////////////
 
@@ -307,9 +332,11 @@ void setup(void)
 	mat4 modelViewMat = mat4(1.0);
 	// Move terrain into view - glm::translate replaces glTranslatef
 	//modelViewMat = translate(modelViewMat, vec3(5, -2.5f, -40.0f)); // 5x5 grid
-	modelViewMat = translate(modelViewMat, vec3(-10.0f, -10.0f, -50.0f));
+	modelViewMat = translate(modelViewMat, vec3(-10.0f, -15.0f, -60.0f));
 	modelViewMatLoc = glGetUniformLocation(programId, "modelViewMat");
-	glUniformMatrix4fv(modelViewMatLoc, 1, GL_FALSE, value_ptr(modelViewMat));
+	glUniformMatrix4fv(modelViewMatLoc, 1, GL_FALSE, value_ptr(modelViewMat));	normalMat = transpose(inverse(mat3(modelViewMat)));
+	glUniformMatrix3fv(normalMatLoc, 1, GL_FALSE, value_ptr(normalMat));
+	///////////////////////////////////////
 	///////////////////////////////////////
 }
 
