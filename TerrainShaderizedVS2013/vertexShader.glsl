@@ -6,6 +6,7 @@
 layout(location=0) in vec4 squareCoords;
 layout(location=1) in vec3 squareNormals;
 layout(location=2) in vec2 squareTexCoords;
+layout(location=3) in vec4 squareColors;
 
 struct Material
 {
@@ -43,18 +44,24 @@ uniform vec4 skyColour;
 
 uniform uint Object;
 
+uniform mat4 treeTranslate;
+
 void main(void)
 {
 	if (Object == 0 ){
-		texCoordsExport = squareTexCoords;
+		texCoordsExport = squareTexCoords*2049;
 		gl_Position = projMat * modelViewMat * squareCoords;
 		vec3 normal = normalize(normalMat * squareNormals);
 		vec3 lightDirection = normalize(vec3(light0.coords));
-		colorsExport =max(dot(normal, lightDirection), 0.0f) * (light0.difCols * terrainFandB.difRefl); 
+		colorsExport =globAmb * terrainFandB.ambRefl* max(dot(normal, lightDirection), 0.0f);
 	}
 	if (Object == 1){
 		texCoordsExport = squareTexCoords;
 		gl_Position = projMat * modelViewMat * squareCoords;
 		colorsExport = skyColour;
+	}
+	if (Object == 2){
+		gl_Position = projMat * modelViewMat *treeTranslate* squareCoords;
+		colorsExport = squareColors;
 	}
 }

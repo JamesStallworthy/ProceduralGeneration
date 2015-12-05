@@ -13,6 +13,9 @@
 
 #include "getbmp.h"
 
+#include "TreeBufferPos.h"
+#include "tree.h"
+
 #include <vector>
 
 using namespace std;
@@ -37,13 +40,6 @@ float terrain[MAP_SIZE][MAP_SIZE] = {};
 
 static const vec4 globAmb = vec4(0.9, 0.9, 0.9, 1.0);
 static const vec4 skyColour = vec4(0.0, 0.0, 1.0, 1.0);
-
-struct Vertex
-{
-	float coords[4];
-	float normals[3];
-	float texCoords[2];
-};
 
 struct Material
 {
@@ -79,8 +75,8 @@ static const Matrix4x4 IDENTITY_MATRIX4x4 =
 	}
 };
 
-static enum buffer { SQUARE_VERTICES, SKY_VERTICES };
-static enum object { SQUARE, SKY };
+static enum buffer { SQUARE_VERTICES, SKY_VERTICES , TREE_VERTICES};
+static enum object { SQUARE, SKY , TREE};
 
 // Globals
 static Vertex terrainVertices[MAP_SIZE*MAP_SIZE] = {};
@@ -97,8 +93,8 @@ vertexShaderId,
 fragmentShaderId,
 modelViewMatLoc,
 projMatLoc,
-buffer[2],
-vao[2],
+buffer[3],
+vao[3],
 normalMatLoc,
 texture[2],
 grassTexLoc,
@@ -141,6 +137,13 @@ float randomFloat(float min, float max) {
 	return (random*range) + min;
 }
 vec3 tempNormals[MAP_SIZE][MAP_SIZE];
+
+//Tree values
+
+tree Tree;
+TreeBufferPos pos;
+Vertex treeVertices[2000];
+mat4 treeTranslate = mat4(1);
 
 void CalcNormal()
 {
@@ -362,7 +365,9 @@ void setup(void)
 	DiamondSquareSetup();
 	genSkyBox();
 
-	glClearColor(0.2, 0.2, 0.6, 0.0);
+	pos = Tree.genTree(treeVertices, 0, 8, 25, 25);
+
+	glClearColor(0.3, 0.3, 0.6, 0.0);
 
 	#pragma region Shader
 	// Create shader program executable - read, compile and link shaders
@@ -392,8 +397,10 @@ void setup(void)
 
 	#pragma region Buffer
 	// Create vertex array object (VAO) and vertex buffer object (VBO) and associate data with vertex shader.
-	glGenVertexArrays(2, vao);
-	glGenBuffers(2, buffer);
+	glGenVertexArrays(3, vao);
+	glGenBuffers(3, buffer);
+
+	//Terrain
 	glBindVertexArray(vao[SQUARE]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[SQUARE_VERTICES]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(terrainVertices), terrainVertices, GL_STATIC_DRAW);
@@ -404,7 +411,7 @@ void setup(void)
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(terrainVertices[0]),(GLvoid*)(sizeof(terrainVertices[0].coords) + sizeof(terrainVertices[0].normals)));
 	glEnableVertexAttribArray(2);
-
+	//Sky
 	glBindVertexArray(vao[SKY]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[SKY_VERTICES]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyBoxVertices), skyBoxVertices, GL_STATIC_DRAW);
@@ -416,6 +423,18 @@ void setup(void)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(skyBoxVertices[0]), (GLvoid*)(sizeof(skyBoxVertices[0].coords) + sizeof(skyBoxVertices[0].normals)));
 	glEnableVertexAttribArray(2);
 
+	glBindVertexArray(vao[TREE]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer[TREE_VERTICES]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(treeVertices), treeVertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), 0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), (GLvoid*)sizeof(treeVertices[0].coords));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), (GLvoid*)(sizeof(treeVertices[0].coords) + sizeof(treeVertices[0].normals)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), (GLvoid*)(sizeof(treeVertices[0].coords) + sizeof(treeVertices[0].normals) + sizeof(treeVertices[0].texCoords)));
+	glEnableVertexAttribArray(3);
 	///////////////////////////////////////
 	#pragma endregion
 
@@ -435,7 +454,10 @@ void setup(void)
 
 	glUniform4fv(glGetUniformLocation(programId, "skyColour"), 1, &skyColour[0]);
 
+	glUniformMatrix4fv(glGetUniformLocation(programId, "treeTranslate"), 1, GL_FALSE, value_ptr(treeTranslate));
+
 	objectLoc = glGetUniformLocation(programId, "Object");
+
 	///////////////////////////////////////
 
 #pragma endregion
@@ -512,6 +534,23 @@ void drawScene(void)
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[SKY_VERTICES]);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+	//Draw Tree
+	glBindVertexArray(vao[TREE]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer[TREE_VERTICES]);
+	glUniform1ui(objectLoc, 2);
+	cout << terrain[0][0] << endl;
+	treeTranslate = translate(mat4(1), vec3(0, terrain[0][0], 0));
+	glUniformMatrix4fv(glGetUniformLocation(programId, "treeTranslate"), 1, GL_FALSE, value_ptr(treeTranslate));
+	int q = 0;
+	for (int i = pos.treeStart; i < pos.treeFinish + 1; i += 2) {
+		glLineWidth((pos.depth[(q - 1) / 2]) * 2);
+		glDrawArrays(GL_LINES, i, 2);
+		q += 2;
+	}
+	//Draw leaves
+	for (int i = pos.leafStart; i < pos.leafFinish; i += 4) {
+		glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
+	}
 	glFlush();
 }
 
@@ -532,7 +571,7 @@ int main(int argc, char* argv[])
 	// The core profile excludes all discarded features
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	// Forward compatibility excludes features marked for deprecation ensuring compatability with future versions
-	glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);
+	//glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);
 
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 	glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
