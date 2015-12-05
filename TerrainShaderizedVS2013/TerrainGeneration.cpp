@@ -36,8 +36,6 @@ const float RAND_AMOUNT = 100;
 //Smooth
 const float iterationAmount = 1.9;
 
-const int TREE_AMOUNT = 100;
-
 float terrain[MAP_SIZE][MAP_SIZE] = {};
 
 static const vec4 globAmb = vec4(0.9, 0.9, 0.9, 1.0);
@@ -145,9 +143,6 @@ tree Tree;
 TreeBufferPos pos;
 Vertex treeVertices[2000];
 mat4 treeTranslate = mat4(1);
-vec2 treePositions[TREE_AMOUNT];
-mat4 leafRotation = mat4(1);
-mat4 leafRotationArray[1000];
 
 void CalcNormal()
 {
@@ -355,6 +350,7 @@ void keyInput(unsigned char key, int x, int y)
 	}
 }
 
+<<<<<<< HEAD
 void genTreePositions(){
 	float max = START_RAND_AMOUNT*0.1;
 	float min = -START_RAND_AMOUNT*0.1;
@@ -374,6 +370,14 @@ void genSea() {
 	seaVertices[1] = { { 0,-START_RAND_AMOUNT*0.2,MAP_SIZE,0 } ,{},{},{ 0.0f,0.0f,0.4f,0.0f } };
 	seaVertices[0] = { { MAP_SIZE,-START_RAND_AMOUNT*0.2,0,0 } ,{},{},{ 0.0f,0.0f,0.4f,0.0f } };
 	seaVertices[0] = { { MAP_SIZE,-START_RAND_AMOUNT*0.2,MAP_SIZE,0 } ,{},{},{ 0.0f,0.0f,0.4f,0.0f } };
+=======
+void genSkyBox() {
+	float height = 100;
+	skyBoxVertices[0] = { {0,height,0,1},{0,0,0},{0,0} };
+	skyBoxVertices[1] = { { 0,height,MAP_SIZE,1 },{ 0,0,0 },{ 0,1 } };
+	skyBoxVertices[2] = { { MAP_SIZE,height,0,1 },{ 0,0,0 },{ 1,0 } };
+	skyBoxVertices[3] = { { MAP_SIZE,height,MAP_SIZE,1 },{ 0,0,0 },{ 1,1 } };
+>>>>>>> parent of bcab911... Tree place well
 }
 
 // Initialization routine.
@@ -383,7 +387,10 @@ void setup(void)
 
 	pos = Tree.genTree(treeVertices, 0, 8, 25, 25);
 
+<<<<<<< HEAD
 	genTreePositions();
+=======
+>>>>>>> parent of bcab911... Tree place well
 	glClearColor(0.3, 0.3, 0.6, 0.0);
 
 	#pragma region Shader
@@ -474,8 +481,6 @@ void setup(void)
 
 	glUniformMatrix4fv(glGetUniformLocation(programId, "treeTranslate"), 1, GL_FALSE, value_ptr(treeTranslate));
 
-	glUniformMatrix4fv(glGetUniformLocation(programId, "leafRotation"), 1, GL_FALSE, value_ptr(leafRotation));
-
 	objectLoc = glGetUniformLocation(programId, "Object");
 
 	///////////////////////////////////////
@@ -557,24 +562,18 @@ void drawScene(void)
 	glBindVertexArray(vao[TREE]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[TREE_VERTICES]);
 	glUniform1ui(objectLoc, 2);
-	int x;
-	int z;
-	for (int i = 0; i < TREE_AMOUNT; i++){
-		x = treePositions[i].x;
-		z = treePositions[i].y;
-		treeTranslate = translate(mat4(1), vec3(x,terrain[x][z],z));
-		glUniformMatrix4fv(glGetUniformLocation(programId, "treeTranslate"), 1, GL_FALSE, value_ptr(treeTranslate));
-		int q = 0;
-		for (int i = pos.treeStart; i < pos.treeFinish + 1; i += 2) {
-			glLineWidth((pos.depth[(q - 1) / 2]));
-			glDrawArrays(GL_LINES, i, 2);
-			q += 2;
-		}
-		//Draw leaves
-		for (int i = pos.leafStart; i < pos.leafFinish; i += 4) {
-			treeTranslate = translate(mat4(1), vec3(x, terrain[x][z], z));
-			glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
-		}
+	cout << terrain[0][0] << endl;
+	treeTranslate = translate(mat4(1), vec3(0, terrain[0][0], 0));
+	glUniformMatrix4fv(glGetUniformLocation(programId, "treeTranslate"), 1, GL_FALSE, value_ptr(treeTranslate));
+	int q = 0;
+	for (int i = pos.treeStart; i < pos.treeFinish + 1; i += 2) {
+		glLineWidth((pos.depth[(q - 1) / 2]) * 2);
+		glDrawArrays(GL_LINES, i, 2);
+		q += 2;
+	}
+	//Draw leaves
+	for (int i = pos.leafStart; i < pos.leafFinish; i += 4) {
+		glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
 	}
 	glFlush();
 }

@@ -58,7 +58,11 @@ void main(void)
 		colorsExport = squareColors;
 	}
 	if (Object == 2){
+<<<<<<< HEAD
 		gl_Position = projMat * modelViewMat *treeTranslate*squareCoords;
+=======
+		gl_Position = projMat * modelViewMat *treeTranslate* squareCoords;
+>>>>>>> parent of bcab911... Tree place well
 		colorsExport = squareColors;
 	}
 }
