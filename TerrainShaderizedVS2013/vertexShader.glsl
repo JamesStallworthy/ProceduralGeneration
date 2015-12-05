@@ -62,6 +62,6 @@ void main(void)
 	}
 	if (Object == 2){
 		gl_Position = projMat * modelViewMat *treeTranslate* squareCoords;
-		colorsExport = squareColors/1.5;
+		colorsExport = squareColors/1.3;
 	}
 }
