@@ -22,13 +22,16 @@ using namespace glm;
 // Size of the terrain
 const int MAP_SIZE = 2049;
 
-const int SCREEN_WIDTH = 500;
-const int SCREEN_HEIGHT = 500;
+const int SCREEN_WIDTH = 1024;
+const int SCREEN_HEIGHT = 1024;
 
-const int SEED = 4;
+const int SEED = 1213;
 
-const int START_RAND_AMOUNT = 5;
-const int RAND_AMOUNT = 5;
+const float START_RAND_AMOUNT = 100;
+const float RAND_AMOUNT = 100;
+
+//Smooth
+const float iterationAmount = 1.9;
 
 float terrain[MAP_SIZE][MAP_SIZE] = {};
 
@@ -99,7 +102,7 @@ texture[1],
 grassTexLoc;
 
 //Camera
-const float SPEED = 1;
+const float SPEED = 10;
 const float ROTSPEED = 2;
 float cameraTheta = 0;
 float cameraPhi = 0;
@@ -153,32 +156,32 @@ void CalcNormal()
 }
 
 //DiamondSquare
-void Diamond(int x1, int y1, int width, int iteration) {
+void Diamond(int x1, int y1, int width, float iteration) {
 	//Diamond
-	terrain[x1 + (width) / 2][y1 + (width) / 2] = ((terrain[x1][y1] + terrain[x1 + width][y1] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+	terrain[x1 + (width) / 2][y1 + (width) / 2] = ((terrain[x1][y1] + terrain[x1 + width][y1] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width]) / 4) + randomFloat(-RAND_AMOUNT / iteration, RAND_AMOUNT / iteration);
 }
-void Square(int x1, int y1, int width, int iteration) {
+void Square(int x1, int y1, int width, float iteration) {
 	//Sqaure
 	//top
 	if (y1 - width / 2 < 0)
-		terrain[x1 + width / 2][y1] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1 + width][y1]) / 3) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width / 2][y1] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1 + width][y1]) / 3) + randomFloat(-RAND_AMOUNT / iteration, RAND_AMOUNT / iteration);
 	else
-		terrain[x1 + width / 2][y1] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1 + width][y1] + terrain[x1 + width / 2][y1 - width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width / 2][y1] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1 + width][y1] + terrain[x1 + width / 2][y1 - width / 2]) / 4) + randomFloat(-RAND_AMOUNT / iteration, RAND_AMOUNT / iteration);
 	//Left
 	if (x1 - width / 2 < 0)
-		terrain[x1][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT / iteration, RAND_AMOUNT / iteration);
 	else
-		terrain[x1][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1][y1 + width] + terrain[x1 - width / 2][y1 + width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1] + terrain[x1][y1 + width] + terrain[x1 - width / 2][y1 + width / 2]) / 4) + randomFloat(-RAND_AMOUNT / iteration, RAND_AMOUNT / iteration);
 	//Right
 	if (x1 +  width / 2 > MAP_SIZE - 1)
-		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT / iteration, RAND_AMOUNT / iteration);
 	else
-		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width] + terrain[x1 + width / 2][y1 + width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width][y1 + width / 2] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1 + width][y1] + terrain[x1 + width][y1 + width] + terrain[x1 + width / 2][y1 + width / 2]) / 4) + randomFloat(-RAND_AMOUNT / iteration, RAND_AMOUNT / iteration);
 	//Bottom
 	if (y1 + width / 2 > MAP_SIZE)
-		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width]) / 3) + randomFloat(-RAND_AMOUNT / iteration, RAND_AMOUNT / iteration);
 	else
-		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width] + terrain[x1 + width / 2][y1 +  width / 2]) / 4) + randomFloat(-RAND_AMOUNT, RAND_AMOUNT) / iteration;
+		terrain[x1 + width / 2][y1 + width] = ((terrain[x1 + (width / 2)][y1 + (width / 2)] + terrain[x1][y1 + width] + terrain[x1 + width][y1 + width] + terrain[x1 + width / 2][y1 +  width / 2]) / 4) + randomFloat(-RAND_AMOUNT / iteration, RAND_AMOUNT / iteration);
 }
 void DiamondSquare() {
 	terrain[0][0] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
@@ -187,7 +190,7 @@ void DiamondSquare() {
 	terrain[MAP_SIZE - 1][MAP_SIZE - 1] = randomFloat(-START_RAND_AMOUNT, START_RAND_AMOUNT);
 
 	int width = MAP_SIZE - 1;
-	int iteration = 1;
+	float iteration = 1;
 	while (width > 1) {
 		for (int x = 0; x < MAP_SIZE - 1; x += width) {
 			for (int y = 0; y < MAP_SIZE - 1; y += width) {
@@ -200,7 +203,7 @@ void DiamondSquare() {
 			}
 		}
 		width = width / 2.0f;
-		iteration++;
+		iteration = iteration*iterationAmount;
 	}
 }
 
@@ -407,7 +410,7 @@ void setup(void)
 
 	// Obtain projection matrix uniform location and set value.
 	projMatLoc = glGetUniformLocation(programId, "projMat");
-	projMat = glm::perspective(1.0472, 1.0, 0.1, 200.0);
+	projMat = glm::perspective(1.0472, 1.0, 0.1, 2000.0);
 	glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, value_ptr(projMat));
 	// Obtain modelview matrix uniform location and set value.
 	modelViewMat = lookAt(vec3(0, 0, 100), vec3(0, -15, 0), vec3(0, 1, 0));
