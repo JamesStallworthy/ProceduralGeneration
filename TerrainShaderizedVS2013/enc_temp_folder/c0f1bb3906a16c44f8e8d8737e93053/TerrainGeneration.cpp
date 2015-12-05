@@ -80,7 +80,7 @@ static const Matrix4x4 IDENTITY_MATRIX4x4 =
 };
 
 static enum buffer { SQUARE_VERTICES, SKY_VERTICES , TREE_VERTICES};
-static enum object { SQUARE, SKY_VERTICES, TREE};
+static enum object { SQUARE, SKY , TREE};
 
 // Globals
 static Vertex terrainVertices[MAP_SIZE*MAP_SIZE] = {};
