@@ -1,5 +1,8 @@
 #version 430 core
 
+#define SQUARE_VERTICES 0
+#define SKY_VERTICES 1
+
 layout(location=0) in vec4 squareCoords;
 layout(location=1) in vec3 squareNormals;
 layout(location=2) in vec2 squareTexCoords;
@@ -40,8 +43,6 @@ uniform vec4 skyColour;
 
 uniform uint Object;
 
-uniform mat4 translationMatrix;
-
 void main(void)
 {
 	if (Object == 0 ){
@@ -49,15 +50,11 @@ void main(void)
 		gl_Position = projMat * modelViewMat * squareCoords;
 		vec3 normal = normalize(normalMat * squareNormals);
 		vec3 lightDirection = normalize(vec3(light0.coords));
-		colorsExport = max(dot(normal, lightDirection), 0.0f) * (light0.difCols * terrainFandB.difRefl); 
-		//colorsExport =globAmb * terrainFandB.ambRefl* max(dot(normal, lightDirection), 0.0f);
+		colorsExport =globAmb * terrainFandB.ambRefl* max(dot(normal, lightDirection), 0.0f);
 	}
 	if (Object == 1){
 		texCoordsExport = squareTexCoords;
 		gl_Position = projMat * modelViewMat * squareCoords;
-	}
-	if (Object == 2){
-		gl_Position = projMat * modelViewMat * translationMatrix * squareCoords;
-		colorsExport = vec4(60.0f/256.0f, 80.0f/256.0f, 230.0f/256.0f, 0.0);
+		colorsExport = skyColour;
 	}
 }

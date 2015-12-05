@@ -1,5 +1,8 @@
 #version 430 core
 
+#define SQUARE_VERTICES 0
+#define SKY_VERTICES 1
+
 smooth in vec4 colorsExport;
 
 out vec4 colorsOut;
@@ -20,8 +23,5 @@ void main(void)
 	if (Object == 1){
 		vec4 fieldTexColor = texture(tex, texCoordsExport);
 		colorsOut = fieldTexColor;
-	}
-	if (Object == 2){
-		colorsOut = colorsExport;
 	}
 }

@@ -13,11 +13,6 @@
 
 #include "getbmp.h"
 
-#include "Vertex.h"
-//#include "Branch.h"
-//#include "Leaf.h"
-//#include "TreeBufferPos.h"
-
 #include <vector>
 
 using namespace std;
@@ -30,9 +25,9 @@ const int MAP_SIZE = 2049;
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 1024;
 
-const int SEED = 4;
+const int SEED = 1213;
 
-const float START_RAND_AMOUNT = 200;
+const float START_RAND_AMOUNT = 100;
 const float RAND_AMOUNT = 100;
 
 //Smooth
@@ -42,6 +37,13 @@ float terrain[MAP_SIZE][MAP_SIZE] = {};
 
 static const vec4 globAmb = vec4(0.9, 0.9, 0.9, 1.0);
 static const vec4 skyColour = vec4(0.0, 0.0, 1.0, 1.0);
+
+struct Vertex
+{
+	float coords[4];
+	float normals[3];
+	float texCoords[2];
+};
 
 struct Material
 {
@@ -98,8 +100,9 @@ projMatLoc,
 buffer[2],
 vao[2],
 normalMatLoc,
-texture[3],
+texture[2],
 grassTexLoc,
+skyTexLoc,
 objectLoc;
 
 //Camera
@@ -127,7 +130,7 @@ static const Light light0 =
 	vec4(1.0, 1.0, 1.0, 1.0),
 	vec4(1.0, 1.0, 0.0, 0.0)
 };mat4 modelViewMat = mat4(1.0);
-static BitMapFile *image[3]; // Local storage for bmp image data.
+static BitMapFile *image[2]; // Local storage for bmp image data.
 
 float randomFloat(float min, float max) {
 	float random = ((float)rand()) / (float)RAND_MAX;
@@ -135,8 +138,6 @@ float randomFloat(float min, float max) {
 	return (random*range) + min;
 }
 vec3 tempNormals[MAP_SIZE][MAP_SIZE];
-
-mat4 translationMatrix = mat4(1.0);
 
 void CalcNormal()
 {
@@ -343,14 +344,12 @@ void keyInput(unsigned char key, int x, int y)
 }
 
 void genSkyBox() {
-	float height = START_RAND_AMOUNT *2;
-	//Top
-	skyBoxVertices[0] = { {-MAP_SIZE,height,-MAP_SIZE,1},{0,0,0},{0,0} };
-	skyBoxVertices[1] = { { -MAP_SIZE,height,MAP_SIZE*2,1 },{ 0,0,0 },{ 0,1 } };
-	skyBoxVertices[2] = { { MAP_SIZE*2,height,-MAP_SIZE,1 },{ 0,0,0 },{ 1,0 } };
-	skyBoxVertices[3] = { { MAP_SIZE*2,height,MAP_SIZE*2,1 },{ 0,0,0 },{ 1,1 } };
+	float height = 100;
+	skyBoxVertices[0] = { {0,height,0,1},{0,0,0},{0,0} };
+	skyBoxVertices[1] = { { 0,height,MAP_SIZE,1 },{ 0,0,0 },{ 0,1 } };
+	skyBoxVertices[2] = { { MAP_SIZE,height,0,1 },{ 0,0,0 },{ 1,0 } };
+	skyBoxVertices[3] = { { MAP_SIZE,height,MAP_SIZE,1 },{ 0,0,0 },{ 1,1 } };
 }
-
 
 // Initialization routine.
 void setup(void)
@@ -358,7 +357,7 @@ void setup(void)
 	DiamondSquareSetup();
 	genSkyBox();
 
-	glClearColor(94.0f/256.0f, 134.0f/256.0f, 160.0f/256.0f, 0.0);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 
 	#pragma region Shader
 	// Create shader program executable - read, compile and link shaders
@@ -426,12 +425,8 @@ void setup(void)
 	glUniform4fv(glGetUniformLocation(programId, "light0.specCols"), 1,&light0.specCols[0]);
 	glUniform4fv(glGetUniformLocation(programId, "light0.coords"), 1,&light0.coords[0]);
 	glUniform4fv(glGetUniformLocation(programId, "skyColour"), 1, &skyColour[0]);
-	
-	objectLoc = glGetUniformLocation(programId, "Object");
 
-	//Translation matrix
-	translationMatrix = translate(translationMatrix, vec3(0, (-RAND_AMOUNT*2.0)*2.5, 0));
-	glUniformMatrix4fv(glGetUniformLocation(programId,"translationMatrix"),1, GL_FALSE,value_ptr(translationMatrix));
+	objectLoc = glGetUniformLocation(programId, "Object");
 	///////////////////////////////////////
 
 #pragma endregion
@@ -503,11 +498,6 @@ void drawScene(void)
 	glUniform1ui(objectLoc, SKY_VERTICES);
 	glBindVertexArray(vao[SKY]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[SKY_VERTICES]);
-	
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-	//Draw water
-	glUniform1ui(objectLoc, 2);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	glFlush();
