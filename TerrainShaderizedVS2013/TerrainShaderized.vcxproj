@@ -84,13 +84,19 @@
   <ItemGroup>
     <ClCompile Include="getbmp.cpp" />
     <ClCompile Include="TerrainGeneration.cpp" />
+    <ClCompile Include="tree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="fragmentShader.glsl" />
     <Text Include="vertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Branch.h" />
     <ClInclude Include="getbmp.h" />
+    <ClInclude Include="Leaf.h" />
+    <ClInclude Include="tree.h" />
+    <ClInclude Include="TreeBufferPos.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

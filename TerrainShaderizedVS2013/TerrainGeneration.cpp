@@ -129,7 +129,10 @@ static const Light light0 =
 	vec4(1.0, 1.0, 1.0, 1.0),
 	vec4(1.0, 1.0, 1.0, 1.0),
 	vec4(1.0, 1.0, 0.0, 0.0)
-};mat4 modelViewMat = mat4(1.0);
+};
+
+mat4 modelViewMat = mat4(1.0);
+
 static BitMapFile *image[2]; // Local storage for bmp image data.
 
 float randomFloat(float min, float max) {
@@ -239,7 +242,8 @@ void DiamondSquareSetup(){
 			terrainVertices[i] = { { (float)x, terrain[x][z], (float)z, 1.0 },{ tempNormals[x][z].x, tempNormals[x][z].y, tempNormals[x][z].z } };
 			float fScaleC = float(x) / float(MAP_SIZE - 1);
 			float fScaleR = float(z) / float(MAP_SIZE - 1);
-			terrainVertices[i].texCoords[0] = fTextureS*fScaleC;			terrainVertices[i].texCoords[1] = fTextureT*fScaleR;
+			terrainVertices[i].texCoords[0] = fTextureS*fScaleC;
+			terrainVertices[i].texCoords[1] = fTextureT*fScaleR;
 			i++;
 		}
 	}
@@ -301,7 +305,8 @@ void shaderCompileTest(GLuint shader)
 	std::vector<GLchar> vertShaderError((logLength > 1) ? logLength : 1);
 	glGetShaderInfoLog(shader, logLength, NULL, &vertShaderError[0]);
 	std::cout << &vertShaderError[0] << std::endl;
-}
+}
+
 // Keyboard input processing routine.
 void keyInput(unsigned char key, int x, int y)
 {
@@ -357,7 +362,7 @@ void setup(void)
 	DiamondSquareSetup();
 	genSkyBox();
 
-	glClearColor(1.0, 1.0, 1.0, 0.0);
+	glClearColor(0.2, 0.2, 0.6, 0.0);
 
 	#pragma region Shader
 	// Create shader program executable - read, compile and link shaders
@@ -398,7 +403,9 @@ void setup(void)
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(terrainVertices[0]), (GLvoid*)sizeof(terrainVertices[0].coords));
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(terrainVertices[0]),(GLvoid*)(sizeof(terrainVertices[0].coords) + sizeof(terrainVertices[0].normals)));
-	glEnableVertexAttribArray(2);	glBindVertexArray(vao[SKY]);
+	glEnableVertexAttribArray(2);
+
+	glBindVertexArray(vao[SKY]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[SKY_VERTICES]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyBoxVertices), skyBoxVertices, GL_STATIC_DRAW);
 
@@ -407,7 +414,8 @@ void setup(void)
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(skyBoxVertices[0]), (GLvoid*)sizeof(skyBoxVertices[0].coords));
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(skyBoxVertices[0]), (GLvoid*)(sizeof(skyBoxVertices[0].coords) + sizeof(skyBoxVertices[0].normals)));
-	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(2);
+
 	///////////////////////////////////////
 	#pragma endregion
 
@@ -423,7 +431,8 @@ void setup(void)
 	glUniform4fv(glGetUniformLocation(programId, "light0.ambCols"), 1,&light0.ambCols[0]);
 	glUniform4fv(glGetUniformLocation(programId, "light0.difCols"), 1,&light0.difCols[0]);
 	glUniform4fv(glGetUniformLocation(programId, "light0.specCols"), 1,&light0.specCols[0]);
-	glUniform4fv(glGetUniformLocation(programId, "light0.coords"), 1,&light0.coords[0]);
+	glUniform4fv(glGetUniformLocation(programId, "light0.coords"), 1,&light0.coords[0]);
+
 	glUniform4fv(glGetUniformLocation(programId, "skyColour"), 1, &skyColour[0]);
 
 	objectLoc = glGetUniformLocation(programId, "Object");
@@ -442,9 +451,12 @@ void setup(void)
 	// Obtain modelview matrix uniform location and set value.
 	modelViewMat = lookAt(vec3(0, 0, 100), vec3(0, -15, 0), vec3(0, 1, 0));
 	modelViewMatLoc = glGetUniformLocation(programId, "modelViewMat");
-	glUniformMatrix4fv(modelViewMatLoc, 1, GL_FALSE, value_ptr(modelViewMat));	normalMat = transpose(inverse(mat3(modelViewMat)));
+	glUniformMatrix4fv(modelViewMatLoc, 1, GL_FALSE, value_ptr(modelViewMat));
+	normalMat = transpose(inverse(mat3(modelViewMat)));
 	glUniformMatrix3fv(normalMatLoc, 1, GL_FALSE, value_ptr(normalMat));
-	///////////////////////////////////////	//Texture loading Grass
+	///////////////////////////////////////
+
+	//Texture loading Grass
 	image[0] = getbmp("Grass.bmp");
 	glGenTextures(2, texture);
 	glActiveTexture(GL_TEXTURE0);
@@ -527,7 +539,8 @@ int main(int argc, char* argv[])
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("TerrainGeneration");
 	
-	glEnable(GL_DEPTH_TEST);	//glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_BACK);
 	// Set OpenGL to render in wireframe mode
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

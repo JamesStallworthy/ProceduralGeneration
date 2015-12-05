@@ -50,7 +50,7 @@ void main(void)
 		gl_Position = projMat * modelViewMat * squareCoords;
 		vec3 normal = normalize(normalMat * squareNormals);
 		vec3 lightDirection = normalize(vec3(light0.coords));
-		colorsExport =globAmb * terrainFandB.ambRefl* max(dot(normal, lightDirection), 0.0f);
+		colorsExport =max(dot(normal, lightDirection), 0.0f) * (light0.difCols * terrainFandB.difRefl); 
 	}
 	if (Object == 1){
 		texCoordsExport = squareTexCoords;
