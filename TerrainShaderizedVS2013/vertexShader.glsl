@@ -46,8 +46,6 @@ uniform uint Object;
 
 uniform mat4 treeTranslate;
 
-uniform mat4 leafRotation;
-
 void main(void)
 {
 	if (Object == 0 ){
@@ -63,7 +61,7 @@ void main(void)
 		colorsExport = skyColour;
 	}
 	if (Object == 2){
-		gl_Position = projMat * modelViewMat *treeTranslate* leafRotation*squareCoords;
+		gl_Position = projMat * modelViewMat *treeTranslate* squareCoords;
 		colorsExport = squareColors;
 	}
 }
