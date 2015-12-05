@@ -104,7 +104,7 @@ skyTexLoc,
 objectLoc;
 
 //Camera
-const float SPEED = 10;
+const float SPEED = 20;
 const float ROTSPEED = 2;
 float cameraTheta = 0;
 float cameraPhi = 0;
@@ -357,9 +357,8 @@ void keyInput(unsigned char key, int x, int y)
 }
 
 void genTreePositions(){
-	cout << START_RAND_AMOUNT*0.8 << endl;
-	float max = START_RAND_AMOUNT*0.8;
-	float min = -START_RAND_AMOUNT*0.8;
+	float max = START_RAND_AMOUNT*0.1;
+	float min = -START_RAND_AMOUNT*0.1;
 	for (int i = 0; i < TREE_AMOUNT; i++) {
 		int x = int(randomFloat(0, MAP_SIZE));
 		int y = int(randomFloat(0, MAP_SIZE));
