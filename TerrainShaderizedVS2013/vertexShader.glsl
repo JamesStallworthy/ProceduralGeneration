@@ -40,13 +40,9 @@ uniform Light light0;
 
 uniform vec4 globAmb;
 
-uniform vec4 skyColour;
-
 uniform uint Object;
 
 uniform mat4 treeTranslate;
-
-uniform mat4 leafRotation;
 
 void main(void)
 {
@@ -58,12 +54,11 @@ void main(void)
 		colorsExport =globAmb * terrainFandB.ambRefl* max(dot(normal, lightDirection), 0.0f);
 	}
 	if (Object == 1){
-		texCoordsExport = squareTexCoords;
-		gl_Position = projMat * modelViewMat * squareCoords;
-		colorsExport = skyColour;
+		gl_Position = projMat * modelViewMat *treeTranslate*squareCoords;
+		colorsExport = squareColors;
 	}
 	if (Object == 2){
-		gl_Position = projMat * modelViewMat *treeTranslate* leafRotation*squareCoords;
+		gl_Position = projMat * modelViewMat *treeTranslate*squareCoords;
 		colorsExport = squareColors;
 	}
 }

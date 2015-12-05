@@ -21,8 +21,7 @@ void main(void)
 		colorsOut = fieldTexColor * colorsExport;
 	}
 	if (Object == 1){
-		vec4 fieldTexColor = texture(tex, texCoordsExport);
-		colorsOut = fieldTexColor;
+		colorsOut = colorsExport;
 	}
 	if (Object == 2){
 		colorsOut = colorsExport;
