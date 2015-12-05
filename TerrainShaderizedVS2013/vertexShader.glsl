@@ -53,6 +53,7 @@ void main(void)
 		colorsExport =globAmb * terrainFandB.ambRefl* max(dot(normal, lightDirection), 0.0f);
 	}
 	if (Object == 1){
+		texCoordsExport = squareTexCoords;
 		gl_Position = projMat * modelViewMat * squareCoords;
 		colorsExport = skyColour;
 	}

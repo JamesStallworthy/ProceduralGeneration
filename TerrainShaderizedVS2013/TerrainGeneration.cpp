@@ -346,9 +346,9 @@ void keyInput(unsigned char key, int x, int y)
 void genSkyBox() {
 	float height = 100;
 	skyBoxVertices[0] = { {0,height,0,1},{0,0,0},{0,0} };
-	skyBoxVertices[1] = { { 0,height,MAP_SIZE,1 },{ 0,0,0 },{ 0,0 } };
-	skyBoxVertices[2] = { { MAP_SIZE,height,0,1 },{ 0,0,0 },{ 0,0 } };
-	skyBoxVertices[3] = { { MAP_SIZE,height,MAP_SIZE,1 },{ 0,0,0 },{ 0,0 } };
+	skyBoxVertices[1] = { { 0,height,MAP_SIZE,1 },{ 0,0,0 },{ 0,1 } };
+	skyBoxVertices[2] = { { MAP_SIZE,height,0,1 },{ 0,0,0 },{ 1,0 } };
+	skyBoxVertices[3] = { { MAP_SIZE,height,MAP_SIZE,1 },{ 0,0,0 },{ 1,1 } };
 }
 
 // Initialization routine.
@@ -454,8 +454,6 @@ void setup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	grassTexLoc = glGetUniformLocation(programId, "grassTex");
-	glUniform1i(grassTexLoc, 0);
 
 	//Texture loading Sky
 	image[1] = getbmp("Sky.bmp");
@@ -466,8 +464,9 @@ void setup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	skyTexLoc = glGetUniformLocation(programId, "skyTex");
-	glUniform1i(skyTexLoc, 0);
+
+	grassTexLoc = glGetUniformLocation(programId, "grassTex");
+	glUniform1i(grassTexLoc, 0);
 
 }
 
@@ -484,6 +483,7 @@ void drawScene(void)
 
 
 	//Draw terrain
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
 	glUniform1ui(objectLoc, SQUARE_VERTICES);
 	glBindVertexArray(vao[SQUARE]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[SQUARE_VERTICES]);
@@ -494,6 +494,7 @@ void drawScene(void)
 	}
 
 	//Draw Sky
+	glBindTexture(GL_TEXTURE_2D, texture[1]);
 	glUniform1ui(objectLoc, SKY_VERTICES);
 	glBindVertexArray(vao[SKY]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[SKY_VERTICES]);
