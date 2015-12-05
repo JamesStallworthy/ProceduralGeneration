@@ -36,6 +36,8 @@ const float RAND_AMOUNT = 100;
 //Smooth
 const float iterationAmount = 1.9;
 
+int AMOUNT_OF_TREES = 100;
+
 float terrain[MAP_SIZE][MAP_SIZE] = {};
 
 static const vec4 globAmb = vec4(0.9, 0.9, 0.9, 1.0);
@@ -144,6 +146,7 @@ tree Tree;
 TreeBufferPos pos;
 Vertex treeVertices[2000];
 mat4 treeTranslate = mat4(1);
+vec2 treePositions[1000];
 
 void CalcNormal()
 {
@@ -359,6 +362,13 @@ void genSkyBox() {
 	skyBoxVertices[3] = { { MAP_SIZE,height,MAP_SIZE,1 },{ 0,0,0 },{ 1,1 } };
 }
 
+void genTreePosition() {
+	for (int i = 0; i < AMOUNT_OF_TREES; i++) {
+		treePositions[i].x = int(randomFloat(0, MAP_SIZE));
+		treePositions[i].y = int(randomFloat(0, MAP_SIZE));
+	}
+}
+
 // Initialization routine.
 void setup(void)
 {
@@ -366,6 +376,7 @@ void setup(void)
 	genSkyBox();
 
 	pos = Tree.genTree(treeVertices, 0, 8, 25, 25);
+	genTreePosition();
 
 	glClearColor(0.3, 0.3, 0.6, 0.0);
 
@@ -538,18 +549,24 @@ void drawScene(void)
 	glBindVertexArray(vao[TREE]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[TREE_VERTICES]);
 	glUniform1ui(objectLoc, 2);
-	cout << terrain[0][0] << endl;
-	treeTranslate = translate(mat4(1), vec3(0, terrain[0][0], 0));
-	glUniformMatrix4fv(glGetUniformLocation(programId, "treeTranslate"), 1, GL_FALSE, value_ptr(treeTranslate));
-	int q = 0;
-	for (int i = pos.treeStart; i < pos.treeFinish + 1; i += 2) {
-		glLineWidth((pos.depth[(q - 1) / 2]) * 2);
-		glDrawArrays(GL_LINES, i, 2);
-		q += 2;
-	}
-	//Draw leaves
-	for (int i = pos.leafStart; i < pos.leafFinish; i += 4) {
-		glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
+	int x;
+	int z;
+	for (int i = 0; i < AMOUNT_OF_TREES; i++) {
+		x = treePositions[i].x;
+		z = treePositions[i].y;
+		treeTranslate = translate(mat4(1), vec3(x, terrain[x][z], z));
+		glUniformMatrix4fv(glGetUniformLocation(programId, "treeTranslate"), 1, GL_FALSE, value_ptr(treeTranslate));
+		int q = 0;
+		for (int i = pos.treeStart; i < pos.treeFinish + 1; i += 2) {
+			glLineWidth((pos.depth[(q - 1) / 2]));
+			glDrawArrays(GL_LINES, i, 2);
+			q += 2;
+		}
+		//Draw leaves
+		for (int i = pos.leafStart; i < pos.leafFinish; i += 4) {
+			treeTranslate = translate(mat4(1), vec3(x, terrain[x][z], z));
+			glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
+		}
 	}
 	glFlush();
 }
