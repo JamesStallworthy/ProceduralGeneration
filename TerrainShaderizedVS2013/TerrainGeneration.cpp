@@ -77,8 +77,8 @@ static const Matrix4x4 IDENTITY_MATRIX4x4 =
 	}
 };
 
-static enum buffer { SQUARE_VERTICES, SKY_VERTICES , TREE_VERTICES, TREE_VERTICES_TWO};
-static enum object { SQUARE, SKY , TREE, TREE_TWO};
+static enum buffer { SQUARE_VERTICES, SKY_VERTICES , TREE_VERTICES};
+static enum object { SQUARE, SKY , TREE};
 
 // Globals
 static Vertex terrainVertices[MAP_SIZE*MAP_SIZE] = {};
@@ -356,18 +356,21 @@ void keyInput(unsigned char key, int x, int y)
 	}
 }
 
+void genSkyBox() {
+	float height = 200;
+	skyBoxVertices[0] = { {0,height,0,1},{0,0,0},{0,0} };
+	skyBoxVertices[1] = { { 0,height,MAP_SIZE,1 },{ 0,0,0 },{ 0,1 } };
+	skyBoxVertices[2] = { { MAP_SIZE,height,0,1 },{ 0,0,0 },{ 1,0 } };
+	skyBoxVertices[3] = { { MAP_SIZE,height,MAP_SIZE,1 },{ 0,0,0 },{ 1,1 } };
+}
+
 void genTreePositions(){
-	cout << START_RAND_AMOUNT*0.8 << endl;
-	float max = START_RAND_AMOUNT*0.8;
-	float min = -START_RAND_AMOUNT*0.8;
 	for (int i = 0; i < TREE_AMOUNT; i++) {
-		int x = int(randomFloat(0, MAP_SIZE));
-		int y = int(randomFloat(0, MAP_SIZE));
-		while (max<terrain[x][y] || min>terrain[x][y]) {
-			x = int(randomFloat(0, MAP_SIZE));
-			y = int(randomFloat(0, MAP_SIZE));
-		}
-		treePositions[i] = vec2(x,y);
+		treePositions[i] = vec2(int(randomFloat(0, MAP_SIZE)), int(randomFloat(0, MAP_SIZE)));
+	}
+	int numOfLeaves = pos.leafFinish - pos.leafStart;
+	for (int i = 0; i < numOfLeaves; i++) {
+		leafRotationArray[i] = rotate(mat4(1), radians(randomFloat(0, 360)), vec3(0, 1, 0));
 	}
 }
 
@@ -375,9 +378,9 @@ void genTreePositions(){
 void setup(void)
 {
 	DiamondSquareSetup();
+	genSkyBox();
 
 	pos = Tree.genTree(treeVertices, 0, 8, 25, 25);
-
 	genTreePositions();
 	glClearColor(0.3, 0.3, 0.6, 0.0);
 
@@ -447,19 +450,6 @@ void setup(void)
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), (GLvoid*)(sizeof(treeVertices[0].coords) + sizeof(treeVertices[0].normals) + sizeof(treeVertices[0].texCoords)));
 	glEnableVertexAttribArray(3);
-
-	//glBindVertexArray(vao[TREE_TWO]);
-	//glBindBuffer(GL_ARRAY_BUFFER, buffer[TREE_VERTICES_TWO]);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(treeVertices), treeVerticesTwo, GL_STATIC_DRAW);
-
-	//glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), 0);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), (GLvoid*)sizeof(treeVertices[0].coords));
-	//glEnableVertexAttribArray(1);
-	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), (GLvoid*)(sizeof(treeVertices[0].coords) + sizeof(treeVertices[0].normals)));
-	//glEnableVertexAttribArray(2);
-	//glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), (GLvoid*)(sizeof(treeVertices[0].coords) + sizeof(treeVertices[0].normals) + sizeof(treeVertices[0].texCoords)));
-	//glEnableVertexAttribArray(3);
 	///////////////////////////////////////
 	#pragma endregion
 
