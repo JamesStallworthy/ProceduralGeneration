@@ -1,1 +1,3 @@
-http://www.spiralgraphics.biz/packs/terrain_lush/index.htm
+grass: http://www.spiralgraphics.biz/packs/terrain_lush/index.htm
+
+water :http://www.cadhatch.com/seamless-water-textures/4588167784
