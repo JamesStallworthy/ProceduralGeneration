@@ -386,7 +386,7 @@ void setup(void)
 	DiamondSquareSetup();
 	genSkyBox();
 
-	pos = Tree.genTree(treeVertices, 0, 8, 25, 25);
+	pos = Tree.genTree(treeVertices, 0, 8, 40, 40);
 	genTreePosition();
 
 	glClearColor(0.3, 0.3, 0.6, 0.0);
