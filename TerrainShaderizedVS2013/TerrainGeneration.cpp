@@ -24,7 +24,7 @@ using namespace std;
 
 using namespace glm;
 
-// Size of the terrain
+// Size of the terrain 2049
 const int MAP_SIZE = 2049;
 
 const int SCREEN_WIDTH = 1024;
@@ -382,6 +382,7 @@ void genTreePosition() {
 // Initialization routine.
 void setup(void)
 {
+	cout <<"Seed: " << SEED << endl;
 	DiamondSquareSetup();
 	genSkyBox();
 
