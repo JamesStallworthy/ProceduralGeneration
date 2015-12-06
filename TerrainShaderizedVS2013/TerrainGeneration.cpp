@@ -30,22 +30,22 @@ const int MAP_SIZE = 2049;
 const int SCREEN_WIDTH = 1366;
 const int SCREEN_HEIGHT = 768;
 
-const int SEED = 4;//time(0);
+const int SEED = 1213;//time(0);
 
-const float START_RAND_AMOUNT = 500;
-const float RAND_AMOUNT = 100;
+const float START_RAND_AMOUNT = 100;
+const float RAND_AMOUNT = 200;
 
 float height = -100;
 
 //Smooth
-const float iterationAmount = 1.8;
+const float iterationAmount = 1.9;
 
 int AMOUNT_OF_TREES = 20;
 
 //Texture Heights
 float TEXTURE_BLEND_HEIGHT = 30;
 float TEXTURE_BLEND_HEIGHT_BOTTOM = height +10;
-float TEXTURE_BLEND_HEIGHT_SNOW = START_RAND_AMOUNT*0.9;
+float TEXTURE_BLEND_HEIGHT_SNOW = START_RAND_AMOUNT*0.8;
 float TEXTURE_BLEND_DISTANCE = 30;
 
 float terrain[MAP_SIZE][MAP_SIZE] = {};
