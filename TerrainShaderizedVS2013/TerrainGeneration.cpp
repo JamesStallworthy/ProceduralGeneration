@@ -40,6 +40,9 @@ const float iterationAmount = 2;
 
 int AMOUNT_OF_TREES = 20;
 
+float TEXTURE_BLEND_HEIGHT = 30;
+float TEXTURE_BLEND_DISTANCE = 50;
+
 float terrain[MAP_SIZE][MAP_SIZE] = {};
 
 static const vec4 globAmb = vec4(0.9, 0.9, 0.9, 1.0);
@@ -100,7 +103,7 @@ projMatLoc,
 buffer[3],
 vao[3],
 normalMatLoc,
-texture[2],
+texture[3],
 TexLoc,
 skyTexLoc,
 objectLoc;
@@ -133,7 +136,7 @@ static const Light light0 =
 
 mat4 modelViewMat = mat4(1.0);
 
-static BitMapFile *image[2]; // Local storage for bmp image data.
+static BitMapFile *image[3]; // Local storage for bmp image data.
 
 float randomFloat(float min, float max) {
 	float random = ((float)rand()) / (float)RAND_MAX;
@@ -239,8 +242,8 @@ void DiamondSquareSetup(){
 	int i = 0;
 
 	// Generate texture co-ordinates
-	float fTextureS = float(MAP_SIZE)*0.1f;
-	float fTextureT = float(MAP_SIZE)*0.1f;
+	float fTextureS = float(MAP_SIZE)*0.01f;
+	float fTextureT = float(MAP_SIZE)*0.01f;
 
 	for (int z = 0; z < MAP_SIZE; z++)
 	{
@@ -477,6 +480,9 @@ void setup(void)
 
 	objectLoc = glGetUniformLocation(programId, "Object");
 
+	glUniform1f(glGetUniformLocation(programId, "blendHeight"), TEXTURE_BLEND_HEIGHT);
+	glUniform1f(glGetUniformLocation(programId, "blendDistance"), TEXTURE_BLEND_DISTANCE);
+
 	///////////////////////////////////////
 
 #pragma endregion
@@ -519,9 +525,21 @@ void setup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
 	TexLoc = glGetUniformLocation(programId, "waterTex");
 	glUniform1i(TexLoc, 1);
+
+	//Texture loading stone
+	image[2] = getbmp("Stone.bmp");
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, texture[2]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image[2]->sizeX, image[2]->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image[2]->data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	TexLoc = glGetUniformLocation(programId, "stoneTex");
+	glUniform1i(TexLoc, 2);
 }
 
 // Drawing routine.
@@ -575,6 +593,7 @@ void drawScene(void)
 			glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
 		}
 	}
+	glutPostRedisplay();
 	glFlush();
 }
 

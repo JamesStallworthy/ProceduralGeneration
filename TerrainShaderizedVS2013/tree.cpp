@@ -120,7 +120,7 @@ float tree::randomFloat(float min, float max)
 TreeBufferPos tree::genTree(Vertex* drawVertices, int startPoint, int count, float angleRight, float angleLeft)
 {
 	drawVertices[startPoint] = { { 0.0,0.0f,0,1 } ,{0,0,0} , {0,0},{ 0.3f,0.1f,0,1 } };
-	drawVertices[startPoint+1] = { { 0.0, 15.0f, 0,1 },{ 0,0,0 } ,{ 0,0 },{ 0.3f,0.1f,0,1 } };
+	drawVertices[startPoint+1] = { { 0.0, 5.0f, 0,1 },{ 0,0,0 } ,{ 0,0 },{ 0.3f,0.1f,0,1 } };
 	srand(time(0));
 	fractalTree(count, drawVertices[startPoint], drawVertices[startPoint+1], angleRight, angleLeft, 10,0);
 	

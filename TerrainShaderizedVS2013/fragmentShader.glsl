@@ -15,24 +15,29 @@ uniform sampler2D grassTex;
 
 uniform sampler2D waterTex;
 
+uniform sampler2D stoneTex;
+
 uniform uint Object;
+
+uniform float blendHeight;
+uniform float blendDistance;
 
 void main(void)
 {
 	if (Object == 0){
-		if (yAxis < 0){
+		if (yAxis < blendHeight){
 			vec4 fieldTexColor = texture(grassTex, texCoordsExport);
 			colorsOut = fieldTexColor * colorsExport;
 		}
-		else if(yAxis > 0 + 10){
-			vec4 fieldTexColor = texture(waterTex, texCoordsExport);
-			colorsOut = fieldTexColor;
+		else if(yAxis > blendHeight + blendDistance){
+			vec4 fieldTexColor = texture(stoneTex, texCoordsExport);
+			colorsOut = fieldTexColor * colorsExport;
 		}
 		else{
-			float value = yAxis/10;
-			vec4 waterTexColor = texture(waterTex, texCoordsExport);
+			float value = (yAxis-blendHeight)/blendDistance;
+			vec4 stoneTexColor = texture(stoneTex, texCoordsExport);
 			vec4 feildTexColor = texture(grassTex, texCoordsExport);
-			colorsOut = (feildTexColor*(1-value))+(waterTexColor*(value));
+			colorsOut = ((feildTexColor*(1-value))+(stoneTexColor*(value)))*colorsExport;
 		}
 	}
 	if (Object == 1){
