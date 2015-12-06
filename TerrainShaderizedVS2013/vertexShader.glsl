@@ -32,6 +32,8 @@ uniform mat4 modelViewMat;
 
 smooth out vec4 colorsExport;
 
+smooth out float yAxis;
+
 out vec2 texCoordsExport;
 
 uniform Material terrainFandB;
@@ -49,8 +51,9 @@ uniform mat4 treeTranslate;
 void main(void)
 {
 	if (Object == 0 ){
-		texCoordsExport = squareTexCoords*2049;
+		texCoordsExport = squareTexCoords;
 		gl_Position = projMat * modelViewMat * squareCoords;
+		yAxis = squareCoords.y;
 		vec3 normal = normalize(normalMat * squareNormals);
 		vec3 lightDirection = normalize(vec3(light0.coords));
 		colorsExport =max(dot(normal, lightDirection), 0.0f) * (light0.difCols * terrainFandB.difRefl); 

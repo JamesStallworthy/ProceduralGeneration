@@ -36,7 +36,7 @@ const float RAND_AMOUNT = 200;
 float height = -100;
 
 //Smooth
-const float iterationAmount = 1.9;
+const float iterationAmount = 2;
 
 int AMOUNT_OF_TREES = 20;
 
@@ -79,12 +79,12 @@ static const Matrix4x4 IDENTITY_MATRIX4x4 =
 	}
 };
 
-static enum buffer { SQUARE_VERTICES, SKY_VERTICES , TREE_VERTICES};
-static enum object { SQUARE, SKY_VERTICES, TREE};
+static enum buffer { SQUARE_VERTICES, SEA_VERTICES , TREE_VERTICES};
+static enum object { SQUARE, SEA, TREE};
 
 // Globals
 static Vertex terrainVertices[MAP_SIZE*MAP_SIZE] = {};
-static Vertex skyBoxVertices[8] = {};
+static Vertex seaVertices[8] = {};
 
 const int numStripsRequired = MAP_SIZE - 1;
 const int verticesPerStrip = 2 * MAP_SIZE;
@@ -101,7 +101,7 @@ buffer[3],
 vao[3],
 normalMatLoc,
 texture[2],
-grassTexLoc,
+TexLoc,
 skyTexLoc,
 objectLoc;
 
@@ -357,10 +357,10 @@ void keyInput(unsigned char key, int x, int y)
 }
 
 void genSkyBox() {
-	skyBoxVertices[0] = { {0,height,0,1},{0,0,0},{0,0} };
-	skyBoxVertices[1] = { { 0,height,MAP_SIZE,1 },{ 0,0,0 },{ 0,1 } };
-	skyBoxVertices[2] = { { MAP_SIZE,height,0,1 },{ 0,0,0 },{ 1,0 } };
-	skyBoxVertices[3] = { { MAP_SIZE,height,MAP_SIZE,1 },{ 0,0,0 },{ 1,1 } };
+	seaVertices[0] = { {0,height,0,1},{0,0,0},{0,0} };
+	seaVertices[1] = { { 0,height,MAP_SIZE,1 },{ 0,0,0 },{ 0,1 } };
+	seaVertices[2] = { { MAP_SIZE,height,0,1 },{ 0,0,0 },{ 1,0 } };
+	seaVertices[3] = { { MAP_SIZE,height,MAP_SIZE,1 },{ 0,0,0 },{ 1,1 } };
 }
 
 void genTreePosition() {
@@ -431,15 +431,15 @@ void setup(void)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(terrainVertices[0]),(GLvoid*)(sizeof(terrainVertices[0].coords) + sizeof(terrainVertices[0].normals)));
 	glEnableVertexAttribArray(2);
 	//Sky
-	glBindVertexArray(vao[SKY]);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer[SKY_VERTICES]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyBoxVertices), skyBoxVertices, GL_STATIC_DRAW);
+	glBindVertexArray(vao[SEA]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer[SEA_VERTICES]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(seaVertices), seaVertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(skyBoxVertices[0]), 0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(seaVertices[0]), 0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(skyBoxVertices[0]), (GLvoid*)sizeof(skyBoxVertices[0].coords));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(seaVertices[0]), (GLvoid*)sizeof(seaVertices[0].coords));
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(skyBoxVertices[0]), (GLvoid*)(sizeof(skyBoxVertices[0].coords) + sizeof(skyBoxVertices[0].normals)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(seaVertices[0]), (GLvoid*)(sizeof(seaVertices[0].coords) + sizeof(seaVertices[0].normals)));
 	glEnableVertexAttribArray(2);
 
 	glBindVertexArray(vao[TREE]);
@@ -507,10 +507,12 @@ void setup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	TexLoc = glGetUniformLocation(programId, "grassTex");
+	glUniform1i(TexLoc, 0);
 
-	//Texture loading Sky
-	image[1] = getbmp("Sky.bmp");
-	glActiveTexture(GL_TEXTURE0);
+	//Texture loading water
+	image[1] = getbmp("Water.bmp");
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture[1]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image[1]->sizeX, image[1]->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image[1]->data);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -518,9 +520,8 @@ void setup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	grassTexLoc = glGetUniformLocation(programId, "grassTex");
-	glUniform1i(grassTexLoc, 0);
-
+	TexLoc = glGetUniformLocation(programId, "waterTex");
+	glUniform1i(TexLoc, 1);
 }
 
 // Drawing routine.
@@ -536,7 +537,6 @@ void drawScene(void)
 
 
 	//Draw terrain
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
 	glUniform1ui(objectLoc, SQUARE_VERTICES);
 	glBindVertexArray(vao[SQUARE]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[SQUARE_VERTICES]);
@@ -547,10 +547,9 @@ void drawScene(void)
 	}
 
 	//Draw Sky
-	glBindTexture(GL_TEXTURE_2D, texture[1]);
-	glUniform1ui(objectLoc, SKY_VERTICES);
-	glBindVertexArray(vao[SKY]);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer[SKY_VERTICES]);
+	glUniform1ui(objectLoc, SEA_VERTICES);
+	glBindVertexArray(vao[SEA]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer[SEA_VERTICES]);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	//Draw Tree
