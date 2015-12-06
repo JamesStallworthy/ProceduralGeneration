@@ -40,8 +40,11 @@ const float iterationAmount = 2;
 
 int AMOUNT_OF_TREES = 20;
 
+//Texture Heights
 float TEXTURE_BLEND_HEIGHT = 30;
-float TEXTURE_BLEND_DISTANCE = 50;
+float TEXTURE_BLEND_HEIGHT_BOTTOM = height +10;
+float TEXTURE_BLEND_HEIGHT_SNOW = START_RAND_AMOUNT*0.9;
+float TEXTURE_BLEND_DISTANCE = 30;
 
 float terrain[MAP_SIZE][MAP_SIZE] = {};
 
@@ -103,7 +106,7 @@ projMatLoc,
 buffer[3],
 vao[3],
 normalMatLoc,
-texture[3],
+texture[4],
 TexLoc,
 skyTexLoc,
 objectLoc;
@@ -136,7 +139,7 @@ static const Light light0 =
 
 mat4 modelViewMat = mat4(1.0);
 
-static BitMapFile *image[3]; // Local storage for bmp image data.
+static BitMapFile *image[4]; // Local storage for bmp image data.
 
 float randomFloat(float min, float max) {
 	float random = ((float)rand()) / (float)RAND_MAX;
@@ -242,8 +245,8 @@ void DiamondSquareSetup(){
 	int i = 0;
 
 	// Generate texture co-ordinates
-	float fTextureS = float(MAP_SIZE)*0.01f;
-	float fTextureT = float(MAP_SIZE)*0.01f;
+	float fTextureS = float(MAP_SIZE)*0.1f;
+	float fTextureT = float(MAP_SIZE)*0.1f;
 
 	for (int z = 0; z < MAP_SIZE; z++)
 	{
@@ -330,29 +333,23 @@ void keyInput(unsigned char key, int x, int y)
 		cameraPos.x += LOS.x * SPEED;
 		cameraPos.z += LOS.z * SPEED;
 		cameraPos.y += LOS.y * SPEED;
-		glutPostRedisplay();
 		break;
 	case 115:
 		cameraPos.x -= LOS.x * SPEED;
 		cameraPos.z -= LOS.z * SPEED;
 		cameraPos.y -= LOS.y * SPEED;
-		glutPostRedisplay();
 		break;
 	case 97:
 		cameraTheta -= ROTSPEED;
-		glutPostRedisplay();
 		break;
 	case 100:
 		cameraTheta += ROTSPEED;
-		glutPostRedisplay();
 		break;
 	case 113:
 		cameraPhi += ROTSPEED;
-		glutPostRedisplay();
 		break;
 	case 122:
 		cameraPhi -= ROTSPEED;
-		glutPostRedisplay();
 		break;
 	default:
 		break;
@@ -370,7 +367,7 @@ void genTreePosition() {
 	for (int i = 0; i < AMOUNT_OF_TREES; i++) {
 		int x = int(randomFloat(0, MAP_SIZE));
 		int y = int(randomFloat(0, MAP_SIZE));
-		while (terrain[x][y] < -100) {
+		while (terrain[x][y] < -100 || terrain[x][y]>TEXTURE_BLEND_HEIGHT) {
 			x = int(randomFloat(0, MAP_SIZE));
 			y = int(randomFloat(0, MAP_SIZE));
 		}
@@ -481,8 +478,10 @@ void setup(void)
 	objectLoc = glGetUniformLocation(programId, "Object");
 
 	glUniform1f(glGetUniformLocation(programId, "blendHeight"), TEXTURE_BLEND_HEIGHT);
+	glUniform1f(glGetUniformLocation(programId, "blendHeightBottom"), TEXTURE_BLEND_HEIGHT_BOTTOM);
+	glUniform1f(glGetUniformLocation(programId, "blendHeightSnow"), TEXTURE_BLEND_HEIGHT_SNOW);
 	glUniform1f(glGetUniformLocation(programId, "blendDistance"), TEXTURE_BLEND_DISTANCE);
-
+	
 	///////////////////////////////////////
 
 #pragma endregion
@@ -505,7 +504,7 @@ void setup(void)
 
 	//Texture loading Grass
 	image[0] = getbmp("Grass.bmp");
-	glGenTextures(2, texture);
+	glGenTextures(4, texture);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image[0]->sizeX, image[0]->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image[0]->data);
@@ -540,6 +539,19 @@ void setup(void)
 
 	TexLoc = glGetUniformLocation(programId, "stoneTex");
 	glUniform1i(TexLoc, 2);
+
+	//Texture loading sand
+	image[3] = getbmp("Sand.bmp");
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, texture[3]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image[3]->sizeX, image[3]->sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image[3]->data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	TexLoc = glGetUniformLocation(programId, "sandTex");
+	glUniform1i(TexLoc, 3);
 }
 
 // Drawing routine.
