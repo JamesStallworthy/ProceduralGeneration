@@ -27,18 +27,18 @@ using namespace glm;
 // Size of the terrain 2049
 const int MAP_SIZE = 2049;
 
-const int SCREEN_WIDTH = 1024;
-const int SCREEN_HEIGHT = 1024;
+const int SCREEN_WIDTH = 1366;
+const int SCREEN_HEIGHT = 768;
 
-const int SEED = time(0);
+const int SEED = 4;//time(0);
 
-const float START_RAND_AMOUNT = 100;
-const float RAND_AMOUNT = 200;
+const float START_RAND_AMOUNT = 500;
+const float RAND_AMOUNT = 100;
 
 float height = -100;
 
 //Smooth
-const float iterationAmount = 2;
+const float iterationAmount = 1.8;
 
 int AMOUNT_OF_TREES = 20;
 
@@ -369,7 +369,7 @@ void genTreePosition() {
 	for (int i = 0; i < AMOUNT_OF_TREES; i++) {
 		int x = int(randomFloat(0, MAP_SIZE));
 		int y = int(randomFloat(0, MAP_SIZE));
-		while (terrain[x][y] < -100 || terrain[x][y]>TEXTURE_BLEND_HEIGHT) {
+		while (terrain[x][y] < height || terrain[x][y]>TEXTURE_BLEND_HEIGHT) {
 			x = int(randomFloat(0, MAP_SIZE));
 			y = int(randomFloat(0, MAP_SIZE));
 		}
@@ -389,7 +389,7 @@ void setup(void)
 	pos = Tree.genTree(treeVertices, 0, 8, 40, 40);
 	genTreePosition();
 
-	glClearColor(0.3, 0.3, 0.6, 0.0);
+	glClearColor(135.0f/255, 206.0f / 255, 250.0f / 255, 0.0);
 
 	#pragma region Shader
 	// Create shader program executable - read, compile and link shaders
@@ -485,6 +485,8 @@ void setup(void)
 	glUniform1f(glGetUniformLocation(programId, "blendHeightSnow"), TEXTURE_BLEND_HEIGHT_SNOW);
 	glUniform1f(glGetUniformLocation(programId, "blendDistance"), TEXTURE_BLEND_DISTANCE);
 	
+	glUniformMatrix4fv(glGetUniformLocation(programId, "skyTranslate"), 1, GL_FALSE, value_ptr(translate(mat4(1), vec3(0.0f, START_RAND_AMOUNT + 100.0f, 0.0f))));
+	
 	///////////////////////////////////////
 
 #pragma endregion
@@ -579,7 +581,7 @@ void drawScene(void)
 		glDrawElements(GL_TRIANGLE_STRIP, verticesPerStrip, GL_UNSIGNED_INT, terrainIndexData[i]);
 	}
 
-	//Draw Sky
+	//Draw sea
 	glUniform1ui(objectLoc, SEA_VERTICES);
 	glBindVertexArray(vao[SEA]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[SEA_VERTICES]);
@@ -608,6 +610,19 @@ void drawScene(void)
 			glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
 		}
 	}
+
+	//Draw clouds
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glUniform1ui(objectLoc, 3);
+	glBindVertexArray(vao[SQUARE]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer[SQUARE_VERTICES]);
+	// For each row - draw the triangle strip
+	for (int i = 0; i < MAP_SIZE - 1; i++)
+	{
+		glDrawElements(GL_TRIANGLE_STRIP, verticesPerStrip, GL_UNSIGNED_INT, terrainIndexData[i]);
+	}
+	glDisable(GL_BLEND);
 	glutPostRedisplay();
 	glFlush();
 }

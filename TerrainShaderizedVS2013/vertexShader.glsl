@@ -48,6 +48,8 @@ uniform uint Object;
 
 uniform mat4 treeTranslate;
 
+uniform mat4 skyTranslate;
+
 void main(void)
 {
 	if (Object == 0 ){
@@ -66,5 +68,15 @@ void main(void)
 	if (Object == 2){
 		gl_Position = projMat * modelViewMat *treeTranslate* squareCoords;
 		colorsExport = squareColors/1.3;
+	}
+
+	if (Object == 3){
+		gl_Position = projMat * modelViewMat *skyTranslate * squareCoords;
+		if (squareCoords.y>50){
+			colorsExport = vec4(0.9f,0.9f,1.0f,1.0f);
+		}
+		else{
+			colorsExport = vec4(1.0f,1.0f,1.0f,0.0f);
+		}
 	}
 }

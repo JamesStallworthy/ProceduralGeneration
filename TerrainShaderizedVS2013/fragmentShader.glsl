@@ -66,6 +66,9 @@ void main(void)
 	if (Object == 2){
 		colorsOut = colorsExport;
 	}
+	if (Object ==3 ){
+		colorsOut = colorsExport;
+	}
 }
 
 //	if (yAxis < blendHeight){
