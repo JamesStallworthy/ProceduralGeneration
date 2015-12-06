@@ -16,6 +16,8 @@
 #include "TreeBufferPos.h"
 #include "tree.h"
 
+#include <time.h>
+
 #include <vector>
 
 using namespace std;
@@ -28,7 +30,7 @@ const int MAP_SIZE = 2049;
 const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 1024;
 
-const int SEED = 4;
+const int SEED = time(0);
 
 const float START_RAND_AMOUNT = 100;
 const float RAND_AMOUNT = 200;
@@ -492,7 +494,7 @@ void setup(void)
 
 	// Obtain projection matrix uniform location and set value.
 	projMatLoc = glGetUniformLocation(programId, "projMat");
-	projMat = glm::perspective(1.0472, 1.0, 0.1, 2000.0);
+	projMat = glm::perspective(1.0472, 1.0, 0.1, 200000.0);
 	glUniformMatrix4fv(projMatLoc, 1, GL_FALSE, value_ptr(projMat));
 	// Obtain modelview matrix uniform location and set value.
 	modelViewMat = lookAt(vec3(0, 0, 100), vec3(0, -15, 0), vec3(0, 1, 0));

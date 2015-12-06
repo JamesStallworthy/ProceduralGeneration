@@ -92,9 +92,9 @@ void tree::genLeaves(int leafID) {
 	leaves[leafID].right.colors[1] = 0.6f;
 	leaves[leafID].top.colors[1] = 1.0f;
 	//Coords
-	vec4 left(- 2,  2,0,0);
-	vec4 right(2,2,0,0);
-	vec4 top(0, 5,0,0);
+	vec4 left(- 4,  4,0,0);
+	vec4 right(4,4,0,0);
+	vec4 top(0, 10,0,0);
 
 	//Rotate
 	float alpha = randomFloat(0,360);
