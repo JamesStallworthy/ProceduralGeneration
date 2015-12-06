@@ -14,7 +14,7 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 		float alpha = ((angleRight + randValue)*3.14 / 180);
 		//mat3x3 rotMatrix(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
 		mat3x3 rotMatrixZ(cos(alpha), sin(alpha),0, -sin(alpha), cos(alpha),0,0,0,1);
-		randBack = randBack + rand;
+		randBack = randBack + rand*5;
 		float randValue2 = randomFloat(-randBack, randBack);
 		float beta = ((angleRight + randValue2)*3.14 / 180);
 		mat3x3 rotMatrixX(1, 0, 0, 0, cos(beta), sin(beta), 0, -sin(beta), cos(beta));
@@ -50,7 +50,7 @@ void tree::fractalTree(int count, Vertex zero, Vertex one, float angleRight, flo
 		randValue = randomFloat(-rand, rand);
 		alpha = ((angleLeft +randValue)*3.14 / 180)*-1;
 		rotMatrixZ = mat3x3(cos(alpha), sin(alpha),0, -sin(alpha), cos(alpha),0,0,0,1);
-		randBack = randBack + rand;
+		randBack = randBack + rand*5;
 		randValue2 = randomFloat(-randBack, randBack);
 		beta = ((angleLeft + randValue2)*3.14 / 180)*-1;
 		rotMatrixX = mat3x3(1, 0, 0, 0, cos(beta), sin(beta), 0, -sin(beta), cos(beta));
@@ -83,26 +83,30 @@ void tree::genLeaves(int leafID) {
 	leaves[leafID].right.colors[1] = 0.6f;
 	leaves[leafID].top.colors[1] = 1.0f;
 	//Coords
-	vec2 left(- 2,  2);
-	vec2 right(2,2);
-	vec2 top(0,  5);
+	vec4 left(- 2,  2,0,0);
+	vec4 right(2,2,0,0);
+	vec4 top(0, 5,0,0);
 
 	//Rotate
 	float alpha = randomFloat(0,360);
-	mat2x2 rotMatrix(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
-	left = left * rotMatrix;
-	right = right * rotMatrix;
-	top = top * rotMatrix;
+	//mat3 rotMatrix(cos(alpha), sin(alpha),0.0f, -sin(alpha), cos(alpha),0.0f,0.0f,0.0f,1.0f);
+	mat4 rotMatrix = mat4(1);
+	rotMatrix = rotate(mat4(1),alpha, vec3(0,0,1));
+	rotMatrix = rotate(rotMatrix, alpha, vec3(0, 1, 0));
+	rotMatrix = rotate(rotMatrix, alpha, vec3(1, 0, 0));
+	left = rotMatrix * left;
+	right = rotMatrix * right;
+	top =  rotMatrix * top;
 
 	leaves[leafID].left.coords[0] = leaves[leafID].base.coords[0] + left.x;
 	leaves[leafID].left.coords[1] = leaves[leafID].base.coords[1] + left.y;
-	leaves[leafID].left.coords[2] = leaves[leafID].base.coords[2];
+	leaves[leafID].left.coords[2] = leaves[leafID].base.coords[2] + left.z;
 	leaves[leafID].right.coords[0] = leaves[leafID].base.coords[0] + right.x;
 	leaves[leafID].right.coords[1] = leaves[leafID].base.coords[1] + right.y;
-	leaves[leafID].right.coords[2] = leaves[leafID].base.coords[2];;
+	leaves[leafID].right.coords[2] = leaves[leafID].base.coords[2] + right.z;
 	leaves[leafID].top.coords[0] = leaves[leafID].base.coords[0] + top.x;
 	leaves[leafID].top.coords[1] = leaves[leafID].base.coords[1] + top.y;
-	leaves[leafID].top.coords[2] = leaves[leafID].base.coords[2];;
+	leaves[leafID].top.coords[2] = leaves[leafID].base.coords[2] + top.z;
 	//4th value in coord needs to be 1
 	leaves[leafID].base.coords[3] = 1;
 	leaves[leafID].left.coords[3] = 1;
