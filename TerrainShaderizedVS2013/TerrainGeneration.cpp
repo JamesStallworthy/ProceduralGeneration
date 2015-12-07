@@ -30,7 +30,7 @@ const int MAP_SIZE = 2049;
 const int SCREEN_WIDTH = 1366;
 const int SCREEN_HEIGHT = 768;
 
-const int SEED = 1213;//time(0);
+const int SEED = 4;//time(0);
 
 const float START_RAND_AMOUNT = 100;
 const float RAND_AMOUNT = 200;
@@ -38,7 +38,7 @@ const float RAND_AMOUNT = 200;
 float height = -100;
 
 //Smooth
-const float iterationAmount = 1.9;
+const float iterationAmount = 2.2;
 
 int AMOUNT_OF_TREES = 20;
 
@@ -163,16 +163,16 @@ void CalcNormal()
 	for (int x = 0; x < MAP_SIZE; x++) {
 		for (int z = 0; z < MAP_SIZE; z++) {
 			if ((z + 1 == MAP_SIZE) && (x + 1 == MAP_SIZE)) {
-				tempNormals[x][z] = glm::normalize(glm::cross(glm::normalize(vec3(0, terrain[x][z - 1] - terrain[x][z], -1)), glm::normalize(vec3(-1, terrain[x - 1][z] - terrain[x][z], 0))));
+				tempNormals[x][z] = glm::normalize(glm::cross(vec3(0, terrain[x][z - 1] - terrain[x][z], -1), vec3(-1, terrain[x - 1][z] - terrain[x][z], 0)));
 			}
 			else if (x + 1 == MAP_SIZE) {
-				tempNormals[x][z] = glm::normalize(glm::cross(glm::normalize(vec3(0, terrain[x][z + 1] - terrain[x][z], 1)), glm::normalize(vec3(-1, terrain[x - 1][z] - terrain[x][z], 0))));
+				tempNormals[x][z] = glm::normalize(glm::cross(vec3(0, terrain[x][z + 1] - terrain[x][z], 1), vec3(-1, terrain[x - 1][z] - terrain[x][z], 0)));
 			}
 			else if (z + 1 == MAP_SIZE) {
-				tempNormals[x][z] = glm::normalize(glm::cross(glm::normalize(vec3(0, terrain[x][z - 1] - terrain[x][z], -1)), glm::normalize(vec3(1, terrain[x + 1][z] - terrain[x][z], 0))));
+				tempNormals[x][z] = glm::normalize(glm::cross(vec3(0, terrain[x][z - 1] - terrain[x][z], -1), vec3(1, terrain[x + 1][z] - terrain[x][z], 0)));
 			}
 			else {
-				tempNormals[x][z] = glm::normalize(glm::cross(glm::normalize(vec3(0, terrain[x][z + 1] - terrain[x][z], 1)), glm::normalize(vec3(1, terrain[x + 1][z] - terrain[x][z], 0))));
+				tempNormals[x][z] = glm::normalize(glm::cross(vec3(0, terrain[x][z + 1] - terrain[x][z], 1), vec3(1, terrain[x + 1][z] - terrain[x][z], 0)));
 			}
 		}
 	}
@@ -517,6 +517,7 @@ void setup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	TexLoc = glGetUniformLocation(programId, "grassTex");
 	glUniform1i(TexLoc, 0);
 
@@ -529,6 +530,7 @@ void setup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	TexLoc = glGetUniformLocation(programId, "waterTex");
 	glUniform1i(TexLoc, 1);
 
@@ -541,7 +543,7 @@ void setup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
+	glGenerateMipmap(GL_TEXTURE_2D);
 	TexLoc = glGetUniformLocation(programId, "stoneTex");
 	glUniform1i(TexLoc, 2);
 
@@ -554,7 +556,7 @@ void setup(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
+	glGenerateMipmap(GL_TEXTURE_2D);
 	TexLoc = glGetUniformLocation(programId, "sandTex");
 	glUniform1i(TexLoc, 3);
 }
