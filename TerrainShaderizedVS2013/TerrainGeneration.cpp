@@ -25,15 +25,15 @@ using namespace std;
 using namespace glm;
 
 // Size of the terrain 2049
-const int MAP_SIZE = 1025;
+const int MAP_SIZE = 2049;
 
 const int SCREEN_WIDTH = 1366;
 const int SCREEN_HEIGHT = 768;
 
 const int SEED = 4;//time(0);
 
-const float START_RAND_AMOUNT = 100;
-const float RAND_AMOUNT = 200;
+const float START_RAND_AMOUNT = 1000;
+const float RAND_AMOUNT = 1000;
 
 float height = -100;
 
@@ -487,7 +487,7 @@ void setup(void)
 	glUniform1f(glGetUniformLocation(programId, "blendHeightSnow"), TEXTURE_BLEND_HEIGHT_SNOW);
 	glUniform1f(glGetUniformLocation(programId, "blendDistance"), TEXTURE_BLEND_DISTANCE);
 	
-	glUniformMatrix4fv(glGetUniformLocation(programId, "skyTranslate"), 1, GL_FALSE, value_ptr(translate(mat4(1), vec3(0.0f, START_RAND_AMOUNT + 100.0f, 0.0f))));
+	glUniformMatrix4fv(glGetUniformLocation(programId, "skyTranslate"), 1, GL_FALSE, value_ptr(translate(mat4(1), vec3(0, START_RAND_AMOUNT + 1000.0f, 0))));
 	
 	///////////////////////////////////////
 

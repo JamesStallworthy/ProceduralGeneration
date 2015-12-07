@@ -72,11 +72,6 @@ void main(void)
 
 	if (Object == 3){
 		gl_Position = projMat * modelViewMat *skyTranslate * squareCoords;
-		if (squareCoords.y>50){
-			colorsExport = vec4(0.9f,0.9f,1.0f,1.0f);
-		}
-		else{
-			colorsExport = vec4(1.0f,1.0f,1.0f,0.0f);
-		}
+		colorsExport = vec4(0.9f,0.9f,1.0f,squareCoords.y/50.0f);
 	}
 }
