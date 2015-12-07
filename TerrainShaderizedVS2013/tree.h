@@ -25,5 +25,5 @@ private:
 	vector <int> depth;
 public:
 	tree() { branchesIterator = 0; };
-	TreeBufferPos genTree(Vertex* drawVertices, int startpoint, int count, float angleRight, float angleLeft);
+	TreeBufferPos genTree(Vertex* drawVertices, int startpoint, int count, float angleRight, float angleLeft, float height);
 };

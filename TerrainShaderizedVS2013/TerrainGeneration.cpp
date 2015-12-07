@@ -41,6 +41,7 @@ float height = -100;
 const float iterationAmount = 2.2;
 
 int AMOUNT_OF_TREES = 20;
+int AMOUNT_OF_BUSHES = 20;
 
 //Texture Heights
 float TEXTURE_BLEND_HEIGHT = 30;
@@ -87,8 +88,8 @@ static const Matrix4x4 IDENTITY_MATRIX4x4 =
 	}
 };
 
-static enum buffer { SQUARE_VERTICES, SEA_VERTICES , TREE_VERTICES};
-static enum object { SQUARE, SEA, TREE};
+static enum buffer { SQUARE_VERTICES, SEA_VERTICES , TREE_VERTICES, BUSH_VERTICES};
+static enum object { SQUARE, SEA, TREE, BUSH};
 
 // Globals
 static Vertex terrainVertices[MAP_SIZE*MAP_SIZE] = {};
@@ -105,8 +106,8 @@ vertexShaderId,
 fragmentShaderId,
 modelViewMatLoc,
 projMatLoc,
-buffer[3],
-vao[3],
+buffer[4],
+vao[4],
 normalMatLoc,
 texture[4],
 TexLoc,
@@ -158,7 +159,12 @@ Vertex treeVertices[2000];
 mat4 treeTranslate = mat4(1);
 vec2 treePositions[1000];
 
+//Bush values
 
+TreeBufferPos posBush;
+Vertex bushVertices[2000];
+mat4 bushTranslate = mat4(1);
+vec2 bushPositions[1000];
 
 void CalcNormal()
 {
@@ -380,6 +386,19 @@ void genTreePosition() {
 		
 	}
 }
+void genBushPosition() {
+	for (int i = 0; i < AMOUNT_OF_BUSHES; i++) {
+		int x = int(randomFloat(0, MAP_SIZE));
+		int y = int(randomFloat(0, MAP_SIZE));
+		while (terrain[x][y] < height || terrain[x][y]>TEXTURE_BLEND_HEIGHT) {
+			x = int(randomFloat(0, MAP_SIZE));
+			y = int(randomFloat(0, MAP_SIZE));
+		}
+		bushPositions[i].x = x;
+		bushPositions[i].y = y;
+
+	}
+}
 
 // Initialization routine.
 void setup(void)
@@ -388,8 +407,11 @@ void setup(void)
 	DiamondSquareSetup();
 	genSkyBox();
 
-	pos = Tree.genTree(treeVertices, 0, 8, 40, 40);
+	pos = Tree.genTree(treeVertices, 0, 8, 40, 40,15);
 	genTreePosition();
+
+	posBush = Tree.genTree(bushVertices, 0, 8, 150, 150, 5);
+	genBushPosition();
 
 	glClearColor(135.0f/255, 206.0f / 255, 250.0f / 255, 0.0);
 
@@ -421,8 +443,8 @@ void setup(void)
 
 	#pragma region Buffer
 	// Create vertex array object (VAO) and vertex buffer object (VBO) and associate data with vertex shader.
-	glGenVertexArrays(3, vao);
-	glGenBuffers(3, buffer);
+	glGenVertexArrays(4, vao);
+	glGenBuffers(4, buffer);
 
 	//Terrain
 	glBindVertexArray(vao[SQUARE]);
@@ -447,6 +469,7 @@ void setup(void)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(seaVertices[0]), (GLvoid*)(sizeof(seaVertices[0].coords) + sizeof(seaVertices[0].normals)));
 	glEnableVertexAttribArray(2);
 
+	//Tree
 	glBindVertexArray(vao[TREE]);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer[TREE_VERTICES]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(treeVertices), treeVertices, GL_STATIC_DRAW);
@@ -458,6 +481,20 @@ void setup(void)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), (GLvoid*)(sizeof(treeVertices[0].coords) + sizeof(treeVertices[0].normals)));
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(treeVertices[0]), (GLvoid*)(sizeof(treeVertices[0].coords) + sizeof(treeVertices[0].normals) + sizeof(treeVertices[0].texCoords)));
+	glEnableVertexAttribArray(3);
+
+	//Bush
+	glBindVertexArray(vao[BUSH]);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer[BUSH_VERTICES]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(bushVertices), bushVertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(bushVertices[0]), 0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(bushVertices[0]), (GLvoid*)sizeof(bushVertices[0].coords));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(bushVertices[0]), (GLvoid*)(sizeof(bushVertices[0].coords) + sizeof(bushVertices[0].normals)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(bushVertices[0]), (GLvoid*)(sizeof(bushVertices[0].coords) + sizeof(bushVertices[0].normals) + sizeof(bushVertices[0].texCoords)));
 	glEnableVertexAttribArray(3);
 	///////////////////////////////////////
 	#pragma endregion
