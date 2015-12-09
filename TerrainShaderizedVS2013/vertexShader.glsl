@@ -58,7 +58,7 @@ void main(void)
 		yAxis = squareCoords.y;
 		vec3 normal = normalize(normalMat * squareNormals);
 		vec3 lightDirection = normalize(vec3(light0.coords));
-		colorsExport =max(dot(normal, lightDirection), 0.0f) * (light0.difCols * terrainFandB.difRefl); 
+		colorsExport =globAmb*light0.ambCols + max(dot(normal, lightDirection), 0.0f) * (light0.difCols * terrainFandB.difRefl); 
 	}
 	if (Object == 1){
 		texCoordsExport = squareTexCoords;

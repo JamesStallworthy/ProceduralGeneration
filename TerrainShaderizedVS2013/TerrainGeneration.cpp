@@ -24,33 +24,41 @@ using namespace std;
 
 using namespace glm;
 
-// Size of the terrain 2049
+// Size of the terrain, Always has to be 2^N + 1
 const int MAP_SIZE = 2049;
 
+//Screen Resolution 
 const int SCREEN_WIDTH = 1366;
 const int SCREEN_HEIGHT = 768;
 
+//Random seed
 const int SEED = 4;//time(0);
 
-const float START_RAND_AMOUNT = 1000;
-const float RAND_AMOUNT = 1000;
+//How high/low each corner can start
+const float START_RAND_AMOUNT = 100;
+//Limit on how high the random amount can change the each point on the terrain
+const float RAND_AMOUNT = 200;
 
-float height = -100;
-
-//Smooth
+//How much RAND_AMOUNT is reduced each iteration. Higher number "smooths" the terrain
 const float iterationAmount = 2.2;
+
+//Height of the water
+float height = -100;
 
 int AMOUNT_OF_TREES = 20;
 
 //Texture Heights
 float TEXTURE_BLEND_HEIGHT = 30;
 float TEXTURE_BLEND_HEIGHT_BOTTOM = height +10;
-float TEXTURE_BLEND_HEIGHT_SNOW = START_RAND_AMOUNT*0.8;
-float TEXTURE_BLEND_DISTANCE = 30;
+float TEXTURE_BLEND_DISTANCE = 30;//Distance the blending occurs over
+float TEXTURE_BLEND_HEIGHT_SNOW = TEXTURE_BLEND_HEIGHT + TEXTURE_BLEND_DISTANCE + 80;
 
+
+//Holds the data for the Y axis
 float terrain[MAP_SIZE][MAP_SIZE] = {};
 
 static const vec4 globAmb = vec4(0.9, 0.9, 0.9, 1.0);
+
 static const vec4 skyColour = vec4(0.0, 0.0, 1.0, 1.0);
 
 struct Material
@@ -154,10 +162,11 @@ vec3 tempNormals[MAP_SIZE][MAP_SIZE];
 
 tree Tree;
 TreeBufferPos pos;
-Vertex treeVertices[2000];
+Vertex treeVertices[4000];
 mat4 treeTranslate = mat4(1);
 vec2 treePositions[1000];
-
+tree Bush;
+TreeBufferPos posBush;
 
 
 void CalcNormal()
@@ -360,7 +369,7 @@ void keyInput(unsigned char key, int x, int y)
 	}
 }
 
-void genSkyBox() {
+void genSeaBox() {
 	seaVertices[0] = { {0,height,0,1},{0,0,0},{0,0} };
 	seaVertices[1] = { { 0,height,MAP_SIZE,1 },{ 0,0,0 },{ 0,1 } };
 	seaVertices[2] = { { MAP_SIZE,height,0,1 },{ 0,0,0 },{ 1,0 } };
@@ -368,7 +377,7 @@ void genSkyBox() {
 }
 
 void genTreePosition() {
-	for (int i = 0; i < AMOUNT_OF_TREES; i++) {
+	for (int i = 0; i < AMOUNT_OF_TREES*2; i++) {
 		int x = int(randomFloat(0, MAP_SIZE));
 		int y = int(randomFloat(0, MAP_SIZE));
 		while (terrain[x][y] < height || terrain[x][y]>TEXTURE_BLEND_HEIGHT) {
@@ -386,10 +395,13 @@ void setup(void)
 {
 	cout <<"Seed: " << SEED << endl;
 	DiamondSquareSetup();
-	genSkyBox();
 
-	pos = Tree.genTree(treeVertices, 0, 8, 40, 40);
+	genSeaBox();
+
+	pos = Tree.genTree(treeVertices, 0, 8, 40, 40, 15);
 	genTreePosition();
+
+	posBush = Bush.genTree(treeVertices, pos.leafFinish + 1, 8, 120, 120,5);
 
 	glClearColor(135.0f/255, 206.0f / 255, 250.0f / 255, 0.0);
 
@@ -570,10 +582,24 @@ void setup(void)
 	TexLoc = glGetUniformLocation(programId, "sandTex");
 	glUniform1i(TexLoc, 3);
 }
+int frame;
+int timeF;
+int timebase;
+float fps;
 
 // Drawing routine.
 void drawScene(void)
 {
+	frame++;
+	timeF = glutGet(GLUT_ELAPSED_TIME);
+
+	if (timeF - timebase > 1000) {
+		fps = frame*1000.0 / (timeF - timebase);
+		timebase = timeF;
+		frame = 0;
+		cout << fps << endl;
+	}
+
 	LOS.x = cos(cameraPhi*3.14 / 180)* sin(cameraTheta*3.14 / 180);
 	LOS.y = sin(cameraPhi*3.14 / 180);
 	LOS.z = cos(cameraPhi*3.14 / 180) * -cos(cameraTheta*3.14 / 180);
@@ -618,6 +644,24 @@ void drawScene(void)
 		}
 		//Draw leaves
 		for (int i = pos.leafStart; i < pos.leafFinish; i += 4) {
+			treeTranslate = translate(mat4(1), vec3(x, terrain[x][z], z));
+			glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
+		}
+	}
+	//Draw bushes
+	for (int i = 0; i < AMOUNT_OF_TREES; i++) {
+		x = treePositions[i+ AMOUNT_OF_TREES].x;
+		z = treePositions[i+ AMOUNT_OF_TREES].y;
+		treeTranslate = translate(mat4(1), vec3(x, terrain[x][z], z));
+		glUniformMatrix4fv(glGetUniformLocation(programId, "treeTranslate"), 1, GL_FALSE, value_ptr(treeTranslate));
+		int q = 0;
+		for (int i = posBush.treeStart; i < posBush.treeFinish + 1; i += 2) {
+			glLineWidth((pos.depth[(q - 1) / 2]));
+			glDrawArrays(GL_LINES, i, 2);
+			q += 2;
+		}
+		//Draw leaves
+		for (int i = posBush.leafStart; i < posBush.leafFinish; i += 4) {
 			treeTranslate = translate(mat4(1), vec3(x, terrain[x][z], z));
 			glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
 		}
